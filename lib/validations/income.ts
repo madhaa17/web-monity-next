@@ -3,7 +3,7 @@ import { z } from "zod";
 export const createIncomeSchema = z.object({
   assetUuid: z.string().min(1, "Select an asset"),
   amount: z.coerce.number().min(0.01, "Amount must be greater than 0"),
-  source: z.string().optional(),
+  source: z.string().min(1, "Source is required"),
   note: z.string().optional(),
   date: z.string().min(1, "Date required"),
 });

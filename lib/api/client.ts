@@ -1,16 +1,11 @@
 /**
  * API client for Monity backend.
- *
- * Token storage (why localStorage, not cookie):
- * - Monity API is external and returns token in JSON body (no Set-Cookie).
- * - Without a BFF, the frontend stores the token after login. A cookie set from
- *   JavaScript cannot be httpOnly, so it does not add security over localStorage.
- * - httpOnly cookies would require the server (or a BFF) to set the cookie.
- * - For this setup we use localStorage for simplicity; switch to cookie when
- *   using a BFF or when the API supports setting cookies with CORS credentials.
+ * Token is stored in cookies: access token readable by client (for Authorization header),
+ * refresh token httpOnly; set/clear/refresh via /api/auth/session, /api/auth/logout, /api/auth/refresh.
  */
 
 import Axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
+import { MONITY_TOKEN } from "@/lib/auth/cookies";
 
 const API_PREFIX = "/api/v1";
 
@@ -28,27 +23,44 @@ export function getBaseUrl(): string {
   return process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
 }
 
-/** Returns token only in browser; null on server. */
+function validToken(value: string | null): string | null {
+  if (value == null || value === "" || value === "undefined") return null;
+  return value;
+}
+
+function getCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+/** Returns access token from cookie in browser; null on server or if invalid. */
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem("monity_token");
+  return validToken(getCookie(MONITY_TOKEN));
 }
 
+/** Client cannot read httpOnly refresh token; returns null. Used only server-side in refresh route. */
 export function getRefreshToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("monity_refresh_token");
+  return null;
 }
 
-export function setTokens(token: string, refreshToken: string): void {
+/** Sets auth cookies via Next.js session route. Call after login/register. */
+export async function setTokens(token: string, refreshToken: string): Promise<void> {
   if (typeof window === "undefined") return;
-  localStorage.setItem("monity_token", token);
-  localStorage.setItem("monity_refresh_token", refreshToken);
+  if (!token || !refreshToken) return;
+  await fetch("/api/auth/session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ token, refreshToken }),
+  });
 }
 
-export function clearTokens(): void {
+/** Clears auth cookies via Next.js logout route. Does not redirect. */
+export async function clearTokens(): Promise<void> {
   if (typeof window === "undefined") return;
-  localStorage.removeItem("monity_token");
-  localStorage.removeItem("monity_refresh_token");
+  await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
 }
 
 function redirectToLogin(): void {
@@ -61,6 +73,8 @@ function isRefreshRequest(config: { url?: string; baseURL?: string }): boolean {
   const url = config.url ?? "";
   return url.includes("auth/refresh");
 }
+
+const REFRESH_ROUTE = "/api/auth/refresh";
 
 const baseURL = `${getBaseUrl().replace(/\/$/, "")}${API_PREFIX}`;
 
@@ -106,35 +120,24 @@ apiAxios.interceptors.response.use(
     }
 
     if (isRefreshRequest(originalRequest)) {
-      clearTokens();
+      await clearTokens();
       redirectToLogin();
       return Promise.reject(new Error("Session expired"));
     }
 
-    const refreshToken = getRefreshToken();
-    if (!refreshToken) {
-      clearTokens();
-      redirectToLogin();
-      return Promise.reject(new Error("Not authenticated"));
-    }
-
     try {
-      const { data } = await apiAxios.post<{ data: { Token: string; RefreshToken: string } }>(
-        "/auth/refresh",
-        { refresh_token: refreshToken }
-      );
-      const token = data?.data?.Token;
-      const newRefreshToken = data?.data?.RefreshToken;
-      if (token && newRefreshToken) {
-        setTokens(token, newRefreshToken);
-        originalRequest.headers.Authorization = `Bearer ${token}`;
+      const refreshRes = await fetch(REFRESH_ROUTE, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (refreshRes.ok) {
         return apiAxios.request(originalRequest);
       }
     } catch {
       // refresh failed
     }
 
-    clearTokens();
+    await clearTokens();
     redirectToLogin();
     return Promise.reject(new Error("Session expired"));
   }

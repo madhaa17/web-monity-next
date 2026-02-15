@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Monity — Finance Tracker (Web)
 
-## Getting Started
+A personal finance web app for tracking **assets**, **expenses**, **incomes**, and **saving goals**. It talks to the [Monity API](https://api-assetmonitor.my.id) (or a compatible backend) for auth and data.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Authentication** — Login and register; JWT stored in cookies (access token readable, refresh token httpOnly). Route protection via Next.js proxy (middleware); session and refresh handled by API routes.
+- **Dashboard** — Overview with portfolio summary, cashflow, monthly trends, expense-by-category charts, recent activity, and saving-goal progress. Initial overview data can be server-rendered (hybrid SSR/CSR).
+- **Assets** — List and manage assets (cash, crypto, stock, etc.); view asset detail with price chart.
+- **Expenses** — List and manage expenses by category; requires at least one CASH asset.
+- **Incomes** — List and manage income entries; requires at least one CASH asset.
+- **Insights** — Monthly cashflow (income, expense, net saving, saving rate) and charts (trends, expense by category).
+- **Saving goals** — Create and track goals with target amount, current amount, and optional deadline.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tech stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Framework** — [Next.js 16](https://nextjs.org) (App Router), [React 19](https://react.dev)
+- **Data & state** — [TanStack React Query](https://tanstack.com/query/latest) for server state; [Zustand](https://zustand-demo.pmnd.rs/) available
+- **Tables** — [TanStack React Table](https://tanstack.com/table/latest) + [shadcn/ui Table](https://ui.shadcn.com/docs/components/table)
+- **UI** — [shadcn/ui](https://ui.shadcn.com) (Radix, Tailwind), [Recharts](https://recharts.org), [Lucide](https://lucide.dev) icons, [Sonner](https://sonner.emilkowal.ski) toasts
+- **Forms & validation** — [React Hook Form](https://react-hook-form.com), [Zod](https://zod.dev), [@hookform/resolvers](https://github.com/react-hook-form/resolvers)
+- **API** — [Axios](https://axios-http.com) for client requests; server-side fetch via `lib/api/server-client` with cookie-based auth
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project structure (high level)
 
-## Learn More
+- `app/` — Routes: `/` (landing), `/login`, `/register`, `/dashboard` (overview, assets, expenses, incomes, insights, saving-goals)
+- `app/api/auth/` — Session (set/read cookies), logout, refresh
+- `components/` — UI primitives and dashboard blocks (overview, assets, expenses, incomes, insights, saving-goals)
+- `hooks/` — Data hooks (e.g. `useOverviewData`, `useAssetsData`, `useExpensesData`), auth (`useAuth`, `useToken`, `useDashboardAuth`), forms
+- `lib/` — API client, server client, auth cookies, queries, validations, formatting
+- `proxy.ts` — Route protection and redirects (replaces deprecated `middleware.ts` in Next.js 16)
 
-To learn more about Next.js, take a look at the following resources:
+## Getting started
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Install dependencies**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   ```bash
+   npm install
+   ```
 
-## Deploy on Vercel
+2. **Environment**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   Create `.env.local` and set the API base URL:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   ```env
+   NEXT_PUBLIC_API_URL=https://api-assetmonitor.my.id
+   ```
+
+   For local backend use `http://localhost:8080` (or your backend URL).
+
+3. **Run the dev server**
+
+   ```bash
+   npm run dev
+   ```
+
+   Open [http://localhost:3000](http://localhost:3000). Use **Log in** or **Register**; after auth you’ll be redirected to the dashboard.
+
+## Scripts
+
+| Command        | Description              |
+|----------------|--------------------------|
+| `npm run dev`  | Start dev server         |
+| `npm run build`| Production build         |
+| `npm run start`| Start production server  |
+| `npm run lint` | Run ESLint               |
+
+## Auth flow (summary)
+
+- **Login/Register** — Client calls backend; on success, client POSTs tokens to `/api/auth/session`, which sets cookies. Redirect to `/dashboard`.
+- **Protected routes** — `proxy.ts` reads `monity_token`; missing cookie on `/dashboard/*` redirects to `/login`.
+- **API calls** — Client sends `Authorization: Bearer <token>` (token from cookie). On 401, client calls `/api/auth/refresh` (refresh token sent via cookie); new tokens set by response cookies; original request is retried.
+- **Server-side** — `getServerToken()` and `serverFetch()` in `lib/api/server-client` use cookies for SSR or API routes.
+
+## License
+
+Private. See repository owner for terms.

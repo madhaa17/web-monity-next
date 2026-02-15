@@ -8,7 +8,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Target } from "lucide-react";
 
 export interface SavingGoalsProgressProps {
   goals: SavingGoal[];
@@ -46,7 +54,17 @@ export function SavingGoalsProgress({
           <CardTitle>Saving goals</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">No saving goals yet.</p>
+          <Empty className="py-8">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Target />
+              </EmptyMedia>
+              <EmptyTitle>No saving goals yet</EmptyTitle>
+              <EmptyDescription>
+                Create a saving goal to track your progress.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         </CardContent>
       </Card>
     );

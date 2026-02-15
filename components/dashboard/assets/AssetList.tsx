@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import type { Asset } from "@/lib/api/types";
 import { formatCurrency, toNumber } from "@/lib/format";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 
 const TYPE_LABELS: Record<string, string> = {
   CASH: "Cash",
@@ -37,7 +38,7 @@ export function AssetList({
               <th className="p-3 text-left font-medium">Type</th>
               <th className="p-3 text-right font-medium">Quantity</th>
               <th className="p-3 text-right font-medium">Cost</th>
-              <th className="w-[120px] p-3 font-medium">Actions</th>
+              <th className="w-[140px] p-3 font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -69,7 +70,7 @@ export function AssetList({
             <th className="p-3 text-left font-medium">Type</th>
             <th className="p-3 text-right font-medium">Quantity</th>
             <th className="p-3 text-right font-medium">Cost</th>
-            <th className="w-[120px] p-3 font-medium">Actions</th>
+            <th className="w-[140px] p-3 font-medium">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -89,6 +90,17 @@ export function AssetList({
                 </td>
                 <td className="p-3">
                   <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      asChild
+                      aria-label="View detail"
+                    >
+                      <Link href={`/dashboard/assets/${asset.uuid}`}>
+                        <Eye className="size-4" />
+                      </Link>
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"

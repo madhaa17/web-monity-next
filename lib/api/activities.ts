@@ -10,7 +10,7 @@ import type { ApiResponse } from "@/lib/api/types";
  * or call with group_by=month and pick the current month group from the response.
  */
 export interface ActivitiesParams {
-  group_by?: "day" | "month" | "year";
+  group_by?: "day" | "week" | "month";
   date?: string;
   tz?: string;
 }
@@ -20,6 +20,15 @@ export function getActivitiesThisMonthParams(tz?: string): ActivitiesParams {
   const now = new Date();
   const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
   const params: ActivitiesParams = { group_by: "month", date };
+  if (tz) params.tz = tz;
+  return params;
+}
+
+/** Params to fetch activities for today (income + expense for "Recent activity" card). */
+export function getActivitiesTodayParams(tz?: string): ActivitiesParams {
+  const now = new Date();
+  const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const params: ActivitiesParams = { group_by: "day", date };
   if (tz) params.tz = tz;
   return params;
 }

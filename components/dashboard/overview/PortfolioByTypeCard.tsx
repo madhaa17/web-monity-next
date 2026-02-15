@@ -3,6 +3,14 @@
 import type { Asset, AssetType, PortfolioSummary } from "@/lib/api/types";
 import { formatCurrency, toNumber } from "@/lib/format";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import { Wallet, TrendingUp, TrendingDown } from "lucide-react";
 
 export interface PortfolioByTypeCardProps {
   portfolio: PortfolioSummary | undefined;
@@ -99,11 +107,21 @@ export function PortfolioByTypeCard({ portfolio, assets }: PortfolioByTypeCardPr
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Portfolio by type</CardTitle>
+        <CardTitle className="text-base">Portfolio Overview</CardTitle>
       </CardHeader>
       <CardContent>
         {groups.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No assets yet.</p>
+          <Empty className="py-8">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Wallet />
+              </EmptyMedia>
+              <EmptyTitle>No assets yet</EmptyTitle>
+              <EmptyDescription>
+                Add assets to see your portfolio by type.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         ) : (
           <div className="space-y-4">
             {groups.map(({ type, total, items }) => (
@@ -112,7 +130,7 @@ export function PortfolioByTypeCard({ portfolio, assets }: PortfolioByTypeCardPr
                 className="border-b border-border/50 pb-4 last:border-0 last:pb-0"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-muted-foreground">
+                  <span className="font-medium text-foreground uppercase">
                     {TYPE_LABELS[type]}
                   </span>
                   <span className="text-sm font-semibold tabular-nums">
@@ -144,11 +162,8 @@ export function PortfolioByTypeCard({ portfolio, assets }: PortfolioByTypeCardPr
                                 : "text-right text-xs text-red-600 dark:text-red-500"
                             }
                           >
-                            {profitLoss >= 0 ? "Profit" : "Loss"}:{" "}
-                            {formatCurrency(
-                              profitLoss >= 0 ? profitLoss : -profitLoss,
-                              currency
-                            )}
+                            {profitLoss >= 0 ? <TrendingUp className="w-4 h-4 inline-block mr-1" /> : <TrendingDown className="w-4 h-4 inline-block mr-1" />}
+                            {formatCurrency(profitLoss, currency)}
                           </div>
                         ) : null}
                       </li>

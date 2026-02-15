@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { authMeQueryOptions } from "@/lib/queries/auth";
+import { authSessionQueryOptions } from "@/lib/queries/auth";
 import { useToken } from "@/hooks/useToken";
 import type { User } from "@/lib/api/types";
 
@@ -12,17 +12,17 @@ export function useAuth(): {
   isAuthenticated: boolean;
 } {
   const { token, isLoaded } = useToken();
-  const { data: user, isPending } = useQuery({
-    ...authMeQueryOptions(),
-    enabled: isLoaded && !!token,
+  const { data: session, isPending } = useQuery({
+    ...authSessionQueryOptions(),
+    enabled: isLoaded,
   });
 
-  const isLoading = !isLoaded || (!!token && isPending);
+  const isLoading = !isLoaded || isPending;
 
   return {
-    user,
+    user: session?.user,
     token: token ?? null,
     isLoading,
-    isAuthenticated: !!token && !!user,
+    isAuthenticated: !!session?.authenticated && !!session?.user,
   };
 }

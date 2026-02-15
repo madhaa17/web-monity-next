@@ -1,12 +1,22 @@
 "use client";
 
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DashboardNavbar } from "@/components/dashboard/DashboardNavbar";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { useDashboardAuth } from "@/hooks/useDashboardAuth";
+
+function CloseSidebarOnNavigate() {
+  const pathname = usePathname();
+  const { setOpenMobile } = useSidebar();
+  useEffect(() => {
+    setOpenMobile(false);
+  }, [pathname, setOpenMobile]);
+  return null;
+}
 
 export default function DashboardLayout({
   children,
@@ -30,6 +40,7 @@ export default function DashboardLayout({
 
   return (
     <SidebarProvider>
+      <CloseSidebarOnNavigate />
       <DashboardSidebar
         pathname={pathname}
         isLoggingOut={isLoggingOut}

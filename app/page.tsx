@@ -11,6 +11,7 @@ import {
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import {
   BarChart3,
+  Coins,
   Target,
   TrendingUp,
   Wallet,
@@ -51,9 +52,10 @@ export default function HomePage() {
         <div className="container mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:px-6">
           <Link
             href="/"
-            className="flex items-center gap-2 font-semibold text-foreground"
+            className="flex items-center gap-2 font-semibold text-2xl text-primary dark:text-primary-foreground"
           >
-            Monity
+            <Coins className="size-6 shrink-0" />
+            <span className="ml-2">Monity</span>
           </Link>
           <nav className="flex items-center gap-2">
             <ThemeToggle className="mr-1" />

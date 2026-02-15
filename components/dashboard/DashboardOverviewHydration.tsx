@@ -40,14 +40,14 @@ function DashboardOverviewClient() {
           <Skeleton className="h-24" />
           <Skeleton className="h-24" />
         </div>
+        <Skeleton className="h-[260px] w-full" />
         <div className="grid gap-6 lg:grid-cols-2">
           <Skeleton className="h-[320px]" />
           <Skeleton className="h-[320px]" />
         </div>
-        <Skeleton className="h-64 max-w-md" />
         <div className="grid gap-6 lg:grid-cols-2">
-          <Skeleton className="h-64" />
-          <Skeleton className="h-64" />
+          <Skeleton className="h-[280px]" />
+          <Skeleton className="h-[280px]" />
         </div>
       </div>
     );

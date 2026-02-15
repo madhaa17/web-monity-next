@@ -1,10 +1,11 @@
 "use client";
 
+import React from "react";
 import type { MonthlyTrendPoint } from "@/lib/api/types";
 import { formatCurrency } from "@/lib/format";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import {
   Area,
   AreaChart,
@@ -87,10 +88,30 @@ export function MonthlyTrendChart({ data, currency = DEFAULT_CURRENCY }: Monthly
                 content={
                   <ChartTooltipContent
                     labelFormatter={(label) => formatMonthLabel(String(label))}
-                    formatter={(value) => formatCurrency(Number(value), currency)}
+                    formatter={(value, name, item) => {
+                      const color = (item.payload as { fill?: string })?.fill ?? item.color ?? "var(--muted-foreground)";
+                      return (
+                        <div className="flex w-full flex-wrap items-center gap-2">
+                          <div
+                            className="h-2.5 w-2.5 shrink-0 rounded-[2px] border border-[var(--color-border)] bg-[var(--color-bg)]"
+                            style={
+                              {
+                                "--color-bg": color,
+                                "--color-border": color,
+                              } as React.CSSProperties
+                            }
+                          />
+                          <span className="text-muted-foreground">{name}</span>
+                          <span className="ml-auto font-mono font-medium tabular-nums">
+                            {formatCurrency(Number(value), currency)}
+                          </span>
+                        </div>
+                      );
+                    }}
                   />
                 }
               />
+              <ChartLegend content={<ChartLegendContent />} />
               <Area
                 type="monotone"
                 dataKey="income"

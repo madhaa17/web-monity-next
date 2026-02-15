@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/sidebar";
 import type { DashboardNavItem } from "@/lib/dashboard-nav";
 import { dashboardNavItems } from "@/lib/dashboard-nav";
+import { Coins } from "lucide-react";
 
 export interface DashboardSidebarProps {
   pathname: string;
@@ -31,8 +32,9 @@ export function DashboardSidebar({
   return (
     <Sidebar side="left" collapsible="offcanvas">
       <SidebarHeader className="flex h-14 shrink-0 items-center justify-center border-b border-sidebar-border px-2">
-        <Link href="/dashboard" className="font-semibold">
-          Monity
+        <Link href="/dashboard" className="font-semibold text-2xl flex items-center text-primary">
+          <Coins className="size-6 shrink-0" />
+          <span className="ml-2">Monity</span>
         </Link>
       </SidebarHeader>
       <SidebarContent>

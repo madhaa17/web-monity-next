@@ -2,6 +2,7 @@
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { getInitials } from "@/lib/user";
 import type { User } from "@/lib/api/types";
 
@@ -15,6 +16,7 @@ export function DashboardNavbar({ user, isLoading }: DashboardNavbarProps) {
     <header className="flex h-14 shrink-0 items-center justify-between border-b px-4 md:px-6">
       <SidebarTrigger className="-ml-1" />
       <div className="flex items-center gap-2 md:gap-3">
+        <ThemeToggle />
         <Avatar>
           <AvatarFallback className="bg-primary text-primary-foreground">
             {getInitials(user)}

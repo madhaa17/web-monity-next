@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getToken, getRefreshToken } from "@/lib/api/client";
 
 export function useToken(): {

@@ -1,59 +1,29 @@
-"use client";
+import { redirect } from "next/navigation";
+import { dehydrate } from "@tanstack/react-query";
+import type { ApiResponse } from "@/lib/api/types";
+import type { FinancialOverview } from "@/lib/api/types";
+import { getServerToken, serverFetch } from "@/lib/api/server-client";
+import { makeQueryClient } from "@/lib/queries/client";
+import { overviewQueryKey } from "@/lib/queries/insights";
+import { DashboardOverviewHydration } from "@/components/dashboard/DashboardOverviewHydration";
 
-import { OverviewContent } from "@/components/dashboard/overview/OverviewContent";
-import { useOverviewData } from "@/hooks/useOverviewData";
-import { Skeleton } from "@/components/ui/skeleton";
-
-export default function DashboardPage() {
-  const {
-    overview,
-    cashflow,
-    portfolio,
-    assets,
-    activities,
-    savingGoals,
-    isPending,
-    isError,
-    error,
-  } = useOverviewData();
-
-  if (isPending) {
-    return (
-      <div className="space-y-8">
-        <Skeleton className="h-8 w-48" />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Skeleton className="h-24" />
-          <Skeleton className="h-24" />
-          <Skeleton className="h-24" />
-        </div>
-        <Skeleton className="h-64 max-w-md" />
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Skeleton className="h-64" />
-          <Skeleton className="h-64" />
-        </div>
-      </div>
-    );
+export default async function DashboardPage() {
+  const token = await getServerToken();
+  if (!token) {
+    redirect("/login");
   }
 
-  if (isError) {
-    return (
-      <div className="space-y-4">
-        <h1 className="text-2xl font-semibold">Overview</h1>
-        <p className="text-destructive">
-          {error?.message ?? "Failed to load overview data."}
-        </p>
-      </div>
-    );
+  const queryClient = makeQueryClient();
+  try {
+    const res = await serverFetch<ApiResponse<FinancialOverview>>("/insights/overview");
+    if (res?.data) {
+      queryClient.setQueryData(overviewQueryKey, res.data);
+    }
+  } catch {
+    // Prefetch best-effort; client will refetch on mount if needed
   }
 
-  return (
-    <OverviewContent
-      overview={overview}
-      cashflow={cashflow}
-      portfolio={portfolio}
-      assets={assets}
-      activities={activities}
-      savingGoals={savingGoals}
-    />
-  );
+  const dehydratedState = dehydrate(queryClient);
+
+  return <DashboardOverviewHydration state={dehydratedState} />;
 }

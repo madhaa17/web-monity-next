@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { register as registerApi } from "@/lib/api/auth";
-import { setTokens } from "@/lib/api/client";
 import type { RegisterFormValues } from "@/lib/validations/auth";
 import { registerSchema } from "@/lib/validations/auth";
 
@@ -24,8 +23,21 @@ export function useRegisterForm() {
     setApiError(null);
     try {
       const res = await registerApi(data);
-      setTokens(res.Token, res.RefreshToken);
-      router.push("/dashboard");
+      if (res.token && res.refreshToken) {
+        const sessionRes = await fetch("/api/auth/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ token: res.token, refreshToken: res.refreshToken }),
+        });
+        if (sessionRes.ok) {
+          router.push("/dashboard");
+        } else {
+          setApiError("Failed to set session");
+        }
+      } else {
+        setApiError("Invalid response from server");
+      }
     } catch (err) {
       setApiError(err instanceof Error ? err.message : "Registration failed");
     }

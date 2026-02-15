@@ -1,9 +1,23 @@
 "use client";
 
+import {
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import type { Expense } from "@/lib/api/types";
 import type { Asset } from "@/lib/api/types";
 import { formatCurrency, formatDate, toNumber } from "@/lib/format";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Pencil, Trash2 } from "lucide-react";
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -16,6 +30,8 @@ const CATEGORY_LABELS: Record<string, string> = {
   SHOPPING: "Shopping",
   OTHER: "Other",
 };
+
+const columnHelper = createColumnHelper<Expense>();
 
 export interface ExpenseListProps {
   expenses: Expense[];
@@ -32,27 +48,84 @@ export function ExpenseList({
   onEdit,
   onDelete,
 }: ExpenseListProps) {
+  const columns = [
+    columnHelper.accessor("date", {
+      header: "Date",
+      cell: ({ getValue }) => formatDate(getValue()),
+    }),
+    columnHelper.accessor("note", {
+      header: "Note",
+      cell: ({ getValue }) => (getValue() as string) ?? "—",
+    }),
+    columnHelper.accessor("category", {
+      header: "Category",
+      cell: ({ getValue }) =>
+        CATEGORY_LABELS[(getValue() as string) ?? "OTHER"] ??
+        (getValue() as string),
+    }),
+    columnHelper.accessor("amount", {
+      header: () => <span className="text-right">Amount</span>,
+      cell: ({ getValue }) => (
+        <span className="tabular-nums text-red-600 dark:text-red-500">
+          {formatCurrency(toNumber(getValue()))}
+        </span>
+      ),
+    }),
+    columnHelper.display({
+      id: "actions",
+      header: () => <span className="w-[120px]" />,
+      cell: ({ row }) => (
+        <div className="flex gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => onEdit(row.original)}
+            aria-label="Edit"
+          >
+            <Pencil className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-destructive hover:text-destructive"
+            onClick={() => onDelete(row.original)}
+            aria-label="Delete"
+          >
+            <Trash2 className="size-4" />
+          </Button>
+        </div>
+      ),
+    }),
+  ];
+
+  const table = useReactTable({
+    data: expenses,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
   if (isLoading) {
     return (
       <div className="rounded-md border">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b bg-muted/50">
-              <th className="p-3 text-left font-medium">Date</th>
-              <th className="p-3 text-left font-medium">Note</th>
-              <th className="p-3 text-left font-medium">Category</th>
-              <th className="p-3 text-right font-medium">Amount</th>
-              <th className="w-[120px] p-3 font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="p-3">Date</TableHead>
+              <TableHead className="p-3">Note</TableHead>
+              <TableHead className="p-3">Category</TableHead>
+              <TableHead className="p-3 text-right">Amount</TableHead>
+              <TableHead className="w-[120px] p-3">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {[1, 2, 3].map((i) => (
-              <tr key={i} className="border-b">
-                <td colSpan={5} className="h-12 animate-pulse bg-muted/30 p-3" />
-              </tr>
+              <TableRow key={i}>
+                <TableCell colSpan={5} className="h-12 animate-pulse bg-muted/30 p-3" />
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     );
   }
@@ -67,55 +140,36 @@ export function ExpenseList({
 
   return (
     <div className="rounded-md border">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b bg-muted/50">
-            <th className="p-3 text-left font-medium">Date</th>
-            <th className="p-3 text-left font-medium">Note</th>
-            <th className="p-3 text-left font-medium">Category</th>
-            <th className="p-3 text-right font-medium">Amount</th>
-            <th className="w-[120px] p-3 font-medium">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {expenses.map((exp) => {
-            const amount = toNumber(exp.amount);
-            const category = (exp.category as string) ?? "OTHER";
-            return (
-              <tr key={exp.uuid} className="border-b last:border-0">
-                <td className="p-3">{formatDate(exp.date)}</td>
-                <td className="p-3">{(exp.note as string) ?? "—"}</td>
-                <td className="p-3">{CATEGORY_LABELS[category] ?? category}</td>
-                <td className="p-3 text-right tabular-nums text-red-600 dark:text-red-500">
-                  {formatCurrency(amount)}
-                </td>
-                <td className="p-3">
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => onEdit(exp)}
-                      aria-label="Edit"
-                    >
-                      <Pencil className="size-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-destructive hover:text-destructive"
-                      onClick={() => onDelete(exp)}
-                      aria-label="Delete"
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <Table>
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id} className="p-3">
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
+                </TableHead>
+              ))}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows.map((row) => (
+            <TableRow key={row.id}>
+              {row.getVisibleCells().map((cell) => (
+                <TableCell key={cell.id} className="p-3">
+                  {flexRender(
+                    cell.column.columnDef.cell,
+                    cell.getContext()
+                  )}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }

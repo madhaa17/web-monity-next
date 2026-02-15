@@ -12,7 +12,7 @@ import type {
 import { cashflowQueryOptions, overviewQueryOptions } from "@/lib/queries/insights";
 import { portfolioQueryOptions } from "@/lib/queries/portfolio";
 import { assetsQueryOptions } from "@/lib/queries/assets";
-import { getActivitiesThisMonthParams } from "@/lib/api/activities";
+import { getActivitiesTodayParams } from "@/lib/api/activities";
 import { activitiesQueryOptions } from "@/lib/queries/activities";
 import { savingGoalsQueryOptions } from "@/lib/queries/saving-goals";
 
@@ -52,7 +52,7 @@ export function useOverviewData(): UseOverviewDataResult {
       cashflowQueryOptions(month),
       portfolioQueryOptions(),
       assetsQueryOptions(),
-      activitiesQueryOptions(getActivitiesThisMonthParams()),
+      activitiesQueryOptions(getActivitiesTodayParams()),
       savingGoalsQueryOptions(),
     ],
   });

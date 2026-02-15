@@ -63,7 +63,7 @@ export function IncomeFormDialog({
     defaultValues: {
       assetUuid: "",
       amount: 0,
-      source: "",
+      source: "Other",
       note: "",
       date: todayISO(),
     },
@@ -90,7 +90,7 @@ export function IncomeFormDialog({
       createForm.reset({
         assetUuid: cashAssets[0]?.uuid ?? "",
         amount: 0,
-        source: "",
+        source: "Other",
         note: "",
         date: todayISO(),
       });
@@ -156,9 +156,13 @@ export function IncomeFormDialog({
               </FieldContent>
             </Field>
             <Field>
-              <FieldLabel htmlFor="source">Source (optional)</FieldLabel>
+              <FieldLabel htmlFor="source">Source</FieldLabel>
               <FieldContent>
-                <Input id="source" {...createForm.register("source")} />
+                <Input
+                  id="source"
+                  placeholder="e.g. Salary, Other"
+                  {...createForm.register("source")}
+                />
               </FieldContent>
             </Field>
             <Field>

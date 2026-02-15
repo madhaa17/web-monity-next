@@ -1,9 +1,16 @@
 import { apiClient } from "@/lib/api/client";
-import type { ApiResponse, Income, CreateIncomeBody } from "@/lib/api/types";
+import type { ApiResponse, Income, CreateIncomeBody, ListResponse } from "@/lib/api/types";
+
+function extractListItems<T>(data: unknown): T[] {
+  if (data && typeof data === "object" && "items" in data && Array.isArray((data as ListResponse<T>).items))
+    return (data as ListResponse<T>).items;
+  if (Array.isArray(data)) return data as T[];
+  return [];
+}
 
 export async function listIncomes(): Promise<Income[]> {
-  const res = await apiClient<ApiResponse<Income[]>>("/incomes");
-  return Array.isArray(res.data) ? res.data : [];
+  const res = await apiClient<ApiResponse<ListResponse<Income>>>("/incomes");
+  return extractListItems<Income>(res.data);
 }
 
 export async function getIncome(uuid: string): Promise<Income> {

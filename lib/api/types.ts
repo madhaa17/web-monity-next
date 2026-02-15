@@ -3,10 +3,25 @@ export interface ApiResponse<T> {
   data: T;
 }
 
-/** Auth: login/register return Token + RefreshToken */
+/** List response meta (paginated endpoints) */
+export interface ListMeta {
+  total?: number;
+  page?: number;
+  limit?: number;
+  totalPages?: number;
+}
+
+/** List response shape: data is { items, meta } */
+export interface ListResponse<T> {
+  items: T[];
+  meta?: ListMeta;
+}
+
+/** Auth: login/register return token + refreshToken (camelCase per OpenAPI) */
 export interface AuthResponse {
-  Token: string;
-  RefreshToken: string;
+  token: string;
+  refreshToken: string;
+  user?: User;
 }
 
 /** Current user (GET /auth/me) */
@@ -25,6 +40,8 @@ export type AssetType =
   | "REAL_ESTATE"
   | "OTHER";
 
+export type AssetStatus = "ACTIVE" | "SOLD" | "PLANNED";
+
 export interface Asset {
   uuid: string;
   name: string;
@@ -37,6 +54,7 @@ export interface Asset {
   totalCost?: number;
   description?: string;
   notes?: string;
+  status?: AssetStatus;
   [key: string]: unknown;
 }
 
@@ -58,6 +76,7 @@ export interface Expense {
   category: ExpenseCategory;
   note?: string;
   date: string;
+  asset?: Asset | null;
   [key: string]: unknown;
 }
 
@@ -68,6 +87,7 @@ export interface Income {
   source?: string;
   note?: string;
   date: string;
+  asset?: Asset | null;
   [key: string]: unknown;
 }
 
@@ -87,13 +107,45 @@ export interface PortfolioSummary {
   [key: string]: unknown;
 }
 
+/** One category total in cashflow (expenseByCategory) */
+export interface CategoryTotal {
+  category: string;
+  total: number;
+  percentage?: number;
+}
+
 export interface CashflowSummary {
+  period?: string;
+  totalIncome?: number;
+  totalExpense?: number;
+  netSaving?: number;
+  savingRate?: number;
+  expenseByCategory?: CategoryTotal[];
+  /** Alias for UI: totalIncome */
   income?: number;
+  /** Alias for UI: totalExpense */
   expense?: number;
   [key: string]: unknown;
 }
 
+/** One month in overview trend (for charts) */
+export interface MonthlyTrendPoint {
+  month: string;
+  income: number;
+  expense: number;
+  netSaving: number;
+}
+
 export interface FinancialOverview {
+  totalAssets?: number;
+  totalSavingGoals?: number;
+  totalTargetAmount?: number;
+  totalCurrentAmount?: number;
+  savingGoalProgress?: number;
+  monthlyIncome?: number;
+  monthlyExpense?: number;
+  monthlyNetSaving?: number;
+  monthlyTrend?: MonthlyTrendPoint[];
   [key: string]: unknown;
 }
 
@@ -124,7 +176,7 @@ export interface CreateExpenseBody {
 export interface CreateIncomeBody {
   assetUuid: string;
   amount: number;
-  source?: string;
+  source: string;
   note?: string;
   date: string;
 }
@@ -134,6 +186,12 @@ export interface CreateSavingGoalBody {
   targetAmount: number;
   currentAmount: number;
   deadline?: string;
+}
+
+/** One point in a price chart time series (from /prices/crypto|stock/{symbol}/chart). */
+export interface PriceChartPoint {
+  time: string;
+  price: number;
 }
 
 export interface CreateAssetBody {

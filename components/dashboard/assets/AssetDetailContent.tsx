@@ -81,16 +81,27 @@ export function AssetDetailContent({
             <span className="text-muted-foreground">Type</span>
             <span>{TYPE_LABELS[asset.type] ?? asset.type}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Quantity</span>
-            <span className="tabular-nums">{quantity.toLocaleString("id-ID")}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Cost</span>
-            <span className="tabular-nums">
-              {formatCurrency(totalCost, currency)}
-            </span>
-          </div>
+          {asset.type === "CASH" ? (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Amount</span>
+              <span className="tabular-nums">
+                {formatCurrency(quantity, currency)}
+              </span>
+            </div>
+          ) : (
+            <>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Quantity</span>
+                <span className="tabular-nums">{quantity.toLocaleString("id-ID")}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Cost</span>
+                <span className="tabular-nums">
+                  {formatCurrency(totalCost, currency)}
+                </span>
+              </div>
+            </>
+          )}
           {(isCrypto || isStock) && currentValue != null ? (
             <div className="flex justify-between">
               <span className="text-muted-foreground">Current value</span>

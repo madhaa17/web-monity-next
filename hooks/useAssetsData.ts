@@ -24,16 +24,24 @@ export function useAssetsData(): UseAssetsDataResult {
   const { data: assets = [], isLoading, isError, error } = useQuery(assetsQueryOptions());
 
   const createMutation = useMutation({
-    mutationFn: (body: CreateAssetFormValues) =>
-      createAsset({
+    mutationFn: (body: CreateAssetFormValues) => {
+      const purchaseDate =
+        body.purchaseDate?.includes("T")
+          ? body.purchaseDate
+          : body.purchaseDate
+            ? `${body.purchaseDate.trim()}T00:00:00.000Z`
+            : new Date().toISOString();
+      return createAsset({
         name: body.name,
         type: body.type,
         quantity: body.quantity,
         purchasePrice: body.purchasePrice,
-        purchaseDate: body.purchaseDate,
+        purchaseDate,
         purchaseCurrency: body.purchaseCurrency,
-        totalCost: body.totalCost || body.purchasePrice * body.quantity,
-      }),
+        totalCost: body.totalCost ?? body.purchasePrice * body.quantity,
+        ...(body.symbol?.trim() && { symbol: body.symbol.trim() }),
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: assetsQueryKey });
       invalidateOverviewQueries(queryClient);

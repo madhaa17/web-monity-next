@@ -24,6 +24,7 @@ export const createAssetSchema = z.object({
 export const updateAssetSchema = z.object({
   name: z.string().min(1, "Name required"),
   quantity: z.coerce.number().min(0, "Quantity must be ≥ 0"),
+  symbol: z.string().optional(),
   notes: z.string().optional(),
 });
 

@@ -37,12 +37,15 @@ export function OverviewContent({
         overview={overview}
       />
 
+      <PortfolioByTypeCard portfolio={portfolio} assets={assets} />
+
       <div className="grid gap-6 lg:grid-cols-2">
         <MonthlyTrendChart data={overview?.monthlyTrend} currency={currency} />
-        <ExpenseByCategoryChart data={cashflow?.expenseByCategory} currency={currency} />
+        <ExpenseByCategoryChart
+          data={cashflow?.expenseByCategory}
+          currency={currency}
+        />
       </div>
-
-      <PortfolioByTypeCard portfolio={portfolio} assets={assets} />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <RecentActivityList activities={activities} />

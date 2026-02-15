@@ -30,6 +30,28 @@ export function formatCurrency(
 }
 
 /**
+ * Format number as IDR display string with dot as thousands separator (e.g. 1500000 -> "1.500.000").
+ * No currency symbol; for use inside inputs with separate prefix.
+ */
+export function formatIdrDisplay(value: number): string {
+  if (value === 0) return "0";
+  if (!Number.isFinite(value) || Number.isNaN(value)) return "";
+  const rounded = Math.round(value);
+  return rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+/**
+ * Parse string from IDR input (dots as thousands separator) to number.
+ * Strips dots and commas, then parses (e.g. "1.500.000" -> 1500000).
+ */
+export function parseIdrInput(str: string): number {
+  const cleaned = str.replace(/\./g, "").replace(/,/g, "").trim();
+  if (cleaned === "") return 0;
+  const n = parseFloat(cleaned);
+  return Number.isNaN(n) ? 0 : n;
+}
+
+/**
  * Format a date string for display (e.g. API date to locale date).
  * @param dateStr - ISO or date string from API
  */

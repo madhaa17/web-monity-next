@@ -40,6 +40,7 @@ export function LoginForm({
               id="email"
               type="email"
               autoComplete="email"
+              placeholder="you@example.com"
               aria-invalid={!!errors.email}
               {...register("email")}
             />
@@ -52,6 +53,7 @@ export function LoginForm({
             <Input
               id="password"
               type="password"
+              placeholder="********"
               autoComplete="current-password"
               aria-invalid={!!errors.password}
               {...register("password")}

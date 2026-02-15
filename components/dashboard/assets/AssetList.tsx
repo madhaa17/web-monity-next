@@ -4,7 +4,14 @@ import Link from "next/link";
 import type { Asset } from "@/lib/api/types";
 import { formatCurrency, toNumber } from "@/lib/format";
 import { Button } from "@/components/ui/button";
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import { Eye, Pencil, Trash2, Wallet } from "lucide-react";
 
 const TYPE_LABELS: Record<string, string> = {
   CASH: "Cash",
@@ -36,7 +43,7 @@ export function AssetList({
             <tr className="border-b bg-muted/50">
               <th className="p-3 text-left font-medium">Name</th>
               <th className="p-3 text-left font-medium">Type</th>
-              <th className="p-3 text-right font-medium">Quantity</th>
+              <th className="p-3 text-right font-medium">Quantity / Amount</th>
               <th className="p-3 text-right font-medium">Cost</th>
               <th className="w-[140px] p-3 font-medium">Actions</th>
             </tr>
@@ -55,8 +62,16 @@ export function AssetList({
 
   if (assets.length === 0) {
     return (
-      <div className="rounded-md border py-12 text-center text-sm text-muted-foreground">
-        No assets yet. Add one to get started.
+      <div className="rounded-md border">
+        <Empty>
+          <EmptyMedia variant="icon">
+            <Wallet />
+          </EmptyMedia>
+          <EmptyHeader>
+            <EmptyTitle>No assets yet</EmptyTitle>
+            <EmptyDescription>Add one to get started.</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       </div>
     );
   }
@@ -68,7 +83,7 @@ export function AssetList({
           <tr className="border-b bg-muted/50">
             <th className="p-3 text-left font-medium">Name</th>
             <th className="p-3 text-left font-medium">Type</th>
-            <th className="p-3 text-right font-medium">Quantity</th>
+            <th className="p-3 text-right font-medium">Quantity / Amount</th>
             <th className="p-3 text-right font-medium">Cost</th>
             <th className="w-[140px] p-3 font-medium">Actions</th>
           </tr>
@@ -78,15 +93,18 @@ export function AssetList({
             const quantity = toNumber(asset.quantity);
             const totalCost = toNumber(asset.totalCost);
             const currency = (asset.purchaseCurrency as string) ?? "IDR";
+            const isCash = asset.type === "CASH";
             return (
               <tr key={asset.uuid} className="border-b last:border-0">
                 <td className="p-3 font-medium">{asset.name}</td>
                 <td className="p-3">{TYPE_LABELS[asset.type] ?? asset.type}</td>
                 <td className="p-3 text-right tabular-nums">
-                  {quantity.toLocaleString("id-ID")}
+                  {isCash
+                    ? formatCurrency(quantity, currency)
+                    : quantity.toLocaleString("id-ID")}
                 </td>
                 <td className="p-3 text-right tabular-nums">
-                  {formatCurrency(totalCost, currency)}
+                  {isCash ? "—" : formatCurrency(totalCost, currency)}
                 </td>
                 <td className="p-3">
                   <div className="flex gap-1">

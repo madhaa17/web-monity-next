@@ -28,7 +28,7 @@ export async function createAsset(body: CreateAssetBody): Promise<Asset> {
 
 export async function updateAsset(
   uuid: string,
-  body: Partial<Pick<Asset, "name" | "quantity" | "notes">>
+  body: Partial<Pick<Asset, "name" | "quantity" | "symbol" | "notes">>
 ): Promise<Asset> {
   const res = await apiClient<ApiResponse<Asset>>(`/assets/${uuid}`, {
     method: "PUT",

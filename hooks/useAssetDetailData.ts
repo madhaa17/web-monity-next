@@ -10,21 +10,27 @@ import { stockChartQueryOptions } from "@/lib/queries/prices";
 
 const DEFAULT_CURRENCY = "IDR";
 
+/** Crypto chart: backend whitelist days = 1, 7, 14, 30, 90 (default 7). Jangan kirim nilai di luar ini. */
+export const CRYPTO_DAYS_WHITELIST: readonly number[] = [1, 7, 14, 30, 90];
+
+/** Stock chart: range + interval. Hindari range panjang (2y, 5y, 10y, max) dengan interval=1d; untuk range panjang pakai 1wk atau 1mo. */
 export type ChartRangePresetKey = "1W" | "1M" | "3M" | "6M" | "1Y";
 
-/** range: 5d, 1mo, 3mo, 6mo, 1y. interval: 1d, 1wk, 1mo. 1D omitted: API returns single point. */
 export const CHART_RANGE_PRESETS: {
   key: ChartRangePresetKey;
   label: string;
-  days: number;
+  /** Days untuk crypto (harus dari CRYPTO_DAYS_WHITELIST). 6M/1Y di-cape 90. */
+  cryptoDays: number;
+  /** Stock: range (5d, 1mo, 3mo, 6mo, 1y — tidak pakai 2y/5y/10y/max + 1d). */
   range: string;
-  interval?: string;
+  /** Stock: interval (1d, 1wk, 1mo). Range panjang wajib 1wk atau 1mo. */
+  interval: string;
 }[] = [
-  { key: "1W", label: "1W", days: 7, range: "5d", interval: "1d" },
-  { key: "1M", label: "1M", days: 30, range: "1mo", interval: "1d" },
-  { key: "3M", label: "3M", days: 90, range: "3mo", interval: "1wk" },
-  { key: "6M", label: "6M", days: 180, range: "6mo", interval: "1wk" },
-  { key: "1Y", label: "1Y", days: 365, range: "1y", interval: "1mo" },
+  { key: "1W", label: "1W", cryptoDays: 7, range: "5d", interval: "1d" },
+  { key: "1M", label: "1M", cryptoDays: 30, range: "1mo", interval: "1d" },
+  { key: "3M", label: "3M", cryptoDays: 90, range: "3mo", interval: "1wk" },
+  { key: "6M", label: "6M", cryptoDays: 90, range: "6mo", interval: "1wk" },
+  { key: "1Y", label: "1Y", cryptoDays: 90, range: "1y", interval: "1mo" },
 ];
 
 export const DEFAULT_CHART_RANGE: ChartRangePresetKey = "1M";
@@ -71,20 +77,27 @@ export function useAssetDetailData(
     CHART_RANGE_PRESETS.find((p) => p.key === chartRange) ??
     CHART_RANGE_PRESETS.find((p) => p.key === DEFAULT_CHART_RANGE) ??
     CHART_RANGE_PRESETS[0];
-  const chartParams = {
+
+  /** Crypto: hanya days (whitelist 1,7,14,30,90). Default 7. */
+  const cryptoChartParams = {
     currency,
-    days: selectedPreset.days,
+    days: selectedPreset.cryptoDays,
+  };
+
+  /** Stock: range + interval. Default 1mo + 1d. Hindari range panjang dengan interval 1d. */
+  const stockChartParams = {
+    currency,
     range: selectedPreset.range,
     interval: selectedPreset.interval,
   };
 
   const cryptoChartQuery = useQuery({
-    ...cryptoChartQueryOptions(symbol, chartParams),
+    ...cryptoChartQueryOptions(symbol, cryptoChartParams),
     enabled: isCrypto && !!symbol,
   });
 
   const stockChartQuery = useQuery({
-    ...stockChartQueryOptions(symbol, chartParams),
+    ...stockChartQueryOptions(symbol, stockChartParams),
     enabled: isStock && !!symbol,
   });
 

@@ -40,6 +40,7 @@ export function RegisterForm({
               id="name"
               type="text"
               autoComplete="name"
+              placeholder="John Doe"
               aria-invalid={!!errors.name}
               {...register("name")}
             />
@@ -53,6 +54,7 @@ export function RegisterForm({
               id="email"
               type="email"
               autoComplete="email"
+              placeholder="you@example.com"
               aria-invalid={!!errors.email}
               {...register("email")}
             />
@@ -66,6 +68,7 @@ export function RegisterForm({
               id="password"
               type="password"
               autoComplete="new-password"
+              placeholder="********"
               aria-invalid={!!errors.password}
               {...register("password")}
             />

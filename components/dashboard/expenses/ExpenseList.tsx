@@ -11,6 +11,13 @@ import type { Asset } from "@/lib/api/types";
 import { formatCurrency, formatDate, toNumber } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import {
   Table,
   TableBody,
   TableCell,
@@ -18,7 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Receipt, Trash2 } from "lucide-react";
 
 const CATEGORY_LABELS: Record<string, string> = {
   FOOD: "Food",
@@ -132,8 +139,16 @@ export function ExpenseList({
 
   if (expenses.length === 0) {
     return (
-      <div className="rounded-md border py-12 text-center text-sm text-muted-foreground">
-        No expenses yet. Add one to get started.
+      <div className="rounded-md border">
+        <Empty>
+          <EmptyMedia variant="icon">
+            <Receipt />
+          </EmptyMedia>
+          <EmptyHeader>
+            <EmptyTitle>No expenses yet</EmptyTitle>
+            <EmptyDescription>Add one to get started.</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       </div>
     );
   }

@@ -2,16 +2,15 @@ import { apiClient } from "@/lib/api/client";
 import type { ApiResponse, PriceChartPoint } from "@/lib/api/types";
 import { toNumber } from "@/lib/format";
 
+/** Crypto chart: backend whitelist days = 1, 7, 14, 30, 90 (default 7). Hanya kirim days (+ currency). */
 export interface CryptoChartParams {
   currency?: string;
   days?: number;
-  range?: string;
-  interval?: string;
 }
 
+/** Stock chart: range (1d, 5d, 1mo, 3mo, 6mo, 1y, …) + interval (1d, 1wk, 1mo). Default range=1mo, interval=1d. Hindari range panjang (2y, 5y, 10y, max) dengan interval=1d. */
 export interface StockChartParams {
   currency?: string;
-  days?: number;
   range?: string;
   interval?: string;
 }

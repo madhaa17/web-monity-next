@@ -77,6 +77,10 @@ export function LoginForm({
           Register
         </Link>
       </p>
+
+      <p className="mt-4 text-center text-sm text-zinc-600 dark:text-zinc-400">
+        Demo account: user@monity.com / password123
+      </p>
     </>
   );
 }

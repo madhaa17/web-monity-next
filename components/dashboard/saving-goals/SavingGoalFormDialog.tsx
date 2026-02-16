@@ -146,7 +146,7 @@ export function SavingGoalFormDialog({
                   render={({ field }) => (
                     <CurrencyInput
                       id="targetAmount"
-                      value={field.value}
+                      value={field.value ?? 0}
                       onChange={field.onChange}
                       aria-invalid={!!createForm.formState.errors.targetAmount}
                     />
@@ -170,7 +170,7 @@ export function SavingGoalFormDialog({
                   render={({ field }) => (
                     <CurrencyInput
                       id="currentAmount"
-                      value={field.value}
+                      value={field.value ?? 0}
                       onChange={field.onChange}
                       aria-invalid={!!createForm.formState.errors.currentAmount}
                     />
@@ -237,7 +237,7 @@ export function SavingGoalFormDialog({
                   render={({ field }) => (
                     <CurrencyInput
                       id="edit-targetAmount"
-                      value={field.value}
+                      value={field.value ?? 0}
                       onChange={field.onChange}
                       aria-invalid={!!editForm.formState.errors.targetAmount}
                     />
@@ -261,7 +261,7 @@ export function SavingGoalFormDialog({
                   render={({ field }) => (
                     <CurrencyInput
                       id="edit-currentAmount"
-                      value={field.value}
+                      value={field.value ?? 0}
                       onChange={field.onChange}
                       aria-invalid={!!editForm.formState.errors.currentAmount}
                     />

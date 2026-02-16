@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Expense } from "@/lib/api/types";
 import type { Asset } from "@/lib/api/types";
@@ -23,6 +23,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import {
   Select,
   SelectContent,
@@ -156,12 +157,17 @@ export function ExpenseFormDialog({
             <Field>
               <FieldLabel htmlFor="amount">Amount</FieldLabel>
               <FieldContent>
-                <Input
-                  id="amount"
-                  type="number"
-                  step="any"
-                  {...createForm.register("amount", { valueAsNumber: true })}
-                  aria-invalid={!!createForm.formState.errors.amount}
+                <Controller
+                  control={createForm.control}
+                  name="amount"
+                  render={({ field }) => (
+                    <CurrencyInput
+                      id="amount"
+                      value={field.value}
+                      onChange={field.onChange}
+                      aria-invalid={!!createForm.formState.errors.amount}
+                    />
+                  )}
                 />
                 <FieldError errors={createForm.formState.errors.amount ? [createForm.formState.errors.amount] : undefined} />
               </FieldContent>
@@ -218,12 +224,17 @@ export function ExpenseFormDialog({
             <Field>
               <FieldLabel htmlFor="edit-amount">Amount</FieldLabel>
               <FieldContent>
-                <Input
-                  id="edit-amount"
-                  type="number"
-                  step="any"
-                  {...editForm.register("amount", { valueAsNumber: true })}
-                  aria-invalid={!!editForm.formState.errors.amount}
+                <Controller
+                  control={editForm.control}
+                  name="amount"
+                  render={({ field }) => (
+                    <CurrencyInput
+                      id="edit-amount"
+                      value={field.value}
+                      onChange={field.onChange}
+                      aria-invalid={!!editForm.formState.errors.amount}
+                    />
+                  )}
                 />
                 <FieldError errors={editForm.formState.errors.amount ? [editForm.formState.errors.amount] : undefined} />
               </FieldContent>

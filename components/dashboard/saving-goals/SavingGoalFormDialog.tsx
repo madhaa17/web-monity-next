@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { SavingGoal } from "@/lib/api/types";
 import {
@@ -28,6 +28,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { CurrencyInput } from "@/components/ui/currency-input";
 
 export interface SavingGoalFormDialogProps {
   open: boolean;
@@ -139,13 +140,17 @@ export function SavingGoalFormDialog({
             <Field>
               <FieldLabel htmlFor="targetAmount">Target amount</FieldLabel>
               <FieldContent>
-                <Input
-                  id="targetAmount"
-                  type="number"
-                  step="any"
-                  min={0.01}
-                  {...createForm.register("targetAmount", { valueAsNumber: true })}
-                  aria-invalid={!!createForm.formState.errors.targetAmount}
+                <Controller
+                  control={createForm.control}
+                  name="targetAmount"
+                  render={({ field }) => (
+                    <CurrencyInput
+                      id="targetAmount"
+                      value={field.value}
+                      onChange={field.onChange}
+                      aria-invalid={!!createForm.formState.errors.targetAmount}
+                    />
+                  )}
                 />
                 <FieldError
                   errors={
@@ -159,15 +164,17 @@ export function SavingGoalFormDialog({
             <Field>
               <FieldLabel htmlFor="currentAmount">Current amount</FieldLabel>
               <FieldContent>
-                <Input
-                  id="currentAmount"
-                  type="number"
-                  step="any"
-                  min={0}
-                  {...createForm.register("currentAmount", {
-                    valueAsNumber: true,
-                  })}
-                  aria-invalid={!!createForm.formState.errors.currentAmount}
+                <Controller
+                  control={createForm.control}
+                  name="currentAmount"
+                  render={({ field }) => (
+                    <CurrencyInput
+                      id="currentAmount"
+                      value={field.value}
+                      onChange={field.onChange}
+                      aria-invalid={!!createForm.formState.errors.currentAmount}
+                    />
+                  )}
                 />
                 <FieldError
                   errors={
@@ -224,15 +231,17 @@ export function SavingGoalFormDialog({
             <Field>
               <FieldLabel htmlFor="edit-targetAmount">Target amount</FieldLabel>
               <FieldContent>
-                <Input
-                  id="edit-targetAmount"
-                  type="number"
-                  step="any"
-                  min={0.01}
-                  {...editForm.register("targetAmount", {
-                    valueAsNumber: true,
-                  })}
-                  aria-invalid={!!editForm.formState.errors.targetAmount}
+                <Controller
+                  control={editForm.control}
+                  name="targetAmount"
+                  render={({ field }) => (
+                    <CurrencyInput
+                      id="edit-targetAmount"
+                      value={field.value}
+                      onChange={field.onChange}
+                      aria-invalid={!!editForm.formState.errors.targetAmount}
+                    />
+                  )}
                 />
                 <FieldError
                   errors={
@@ -246,15 +255,17 @@ export function SavingGoalFormDialog({
             <Field>
               <FieldLabel htmlFor="edit-currentAmount">Current amount</FieldLabel>
               <FieldContent>
-                <Input
-                  id="edit-currentAmount"
-                  type="number"
-                  step="any"
-                  min={0}
-                  {...editForm.register("currentAmount", {
-                    valueAsNumber: true,
-                  })}
-                  aria-invalid={!!editForm.formState.errors.currentAmount}
+                <Controller
+                  control={editForm.control}
+                  name="currentAmount"
+                  render={({ field }) => (
+                    <CurrencyInput
+                      id="edit-currentAmount"
+                      value={field.value}
+                      onChange={field.onChange}
+                      aria-invalid={!!editForm.formState.errors.currentAmount}
+                    />
+                  )}
                 />
                 <FieldError
                   errors={

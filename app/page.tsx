@@ -55,7 +55,7 @@ export default function HomePage() {
             className="flex items-center gap-2 font-semibold text-2xl text-primary dark:text-primary-foreground"
           >
             <Coins className="size-6 shrink-0" />
-            <span className="ml-2">Monity</span>
+            <span className="ml-2">MoneyTor</span>
           </Link>
           <nav className="flex items-center gap-2">
             <ThemeToggle className="mr-1" />
@@ -144,7 +144,7 @@ export default function HomePage() {
       <footer className="border-t py-6">
         <div className="container mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 md:flex-row md:px-6">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Monity. All rights reserved.
+            © {new Date().getFullYear()} MoneyTor. All rights reserved.
           </p>
           <div className="flex gap-6 text-sm">
             <Link

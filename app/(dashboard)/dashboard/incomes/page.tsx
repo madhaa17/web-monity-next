@@ -15,6 +15,14 @@ export default function IncomesPage() {
 
   const {
     incomes,
+    meta,
+    page,
+    setPage,
+    limit,
+    month,
+    setMonth,
+    year,
+    setYear,
     assets,
     cashAssets,
     isLoading,
@@ -73,6 +81,14 @@ export default function IncomesPage() {
   return (
     <IncomesContent
       incomes={incomes}
+      meta={meta}
+      page={page}
+      setPage={setPage}
+      limit={limit}
+      month={month}
+      setMonth={setMonth}
+      year={year}
+      setYear={setYear}
       assets={assets}
       cashAssets={cashAssets}
       isLoading={isLoading}

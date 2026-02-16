@@ -87,7 +87,7 @@ export function useOverviewData(): UseOverviewDataResult {
     portfolio: portfolioResult.data,
     assets: Array.isArray(assetsResult.data) ? assetsResult.data : [],
     activities: Array.isArray(activitiesResult.data) ? activitiesResult.data : [],
-    savingGoals: Array.isArray(savingGoalsResult.data) ? savingGoalsResult.data : [],
+    savingGoals: savingGoalsResult.data?.items ?? [],
     isPending,
     isError,
     error: firstError instanceof Error ? firstError : null,

@@ -1,6 +1,6 @@
-# Monity — Finance Tracker (Web)
+# MoneyTor — Finance Tracker (Web)
 
-A personal finance web app for tracking **assets**, **expenses**, **incomes**, and **saving goals**. It talks to the [Monity API](https://api-assetmonitor.my.id) (or a compatible backend) for auth and data.
+A personal finance web app for tracking **assets**, **expenses**, **incomes**, and **saving goals**. It talks to the [MoneyTor API](https://api-assetmonitor.my.id) (or a compatible backend) for auth and data.
 
 ## Features
 
@@ -68,7 +68,7 @@ A personal finance web app for tracking **assets**, **expenses**, **incomes**, a
 ## Auth flow (summary)
 
 - **Login/Register** — Client calls backend; on success, client POSTs tokens to `/api/auth/session`, which sets cookies. Redirect to `/dashboard`.
-- **Protected routes** — `proxy.ts` reads `monity_token`; missing cookie on `/dashboard/*` redirects to `/login`.
+- **Protected routes** — `proxy.ts` reads `MoneyTor_token`; missing cookie on `/dashboard/*` redirects to `/login`.
 - **API calls** — Client sends `Authorization: Bearer <token>` (token from cookie). On 401, client calls `/api/auth/refresh` (refresh token sent via cookie); new tokens set by response cookies; original request is retried.
 - **Server-side** — `getServerToken()` and `serverFetch()` in `lib/api/server-client` use cookies for SSR or API routes.
 

@@ -1,12 +1,17 @@
 import { queryOptions } from "@tanstack/react-query";
 import * as savingGoalsApi from "@/lib/api/saving-goals";
+import type { ListSavingGoalsParams } from "@/lib/api/saving-goals";
 
 export const savingGoalsQueryKey = ["saving-goals"] as const;
 
-export function savingGoalsQueryOptions() {
+export function savingGoalsQueryKeyWithParams(params?: ListSavingGoalsParams) {
+  return [...savingGoalsQueryKey, params ?? {}] as const;
+}
+
+export function savingGoalsQueryOptions(params?: ListSavingGoalsParams) {
   return queryOptions({
-    queryKey: savingGoalsQueryKey,
-    queryFn: () => savingGoalsApi.listSavingGoals(),
+    queryKey: savingGoalsQueryKeyWithParams(params),
+    queryFn: () => savingGoalsApi.listSavingGoals(params),
   });
 }
 

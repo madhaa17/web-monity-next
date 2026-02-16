@@ -1,7 +1,7 @@
 {
 	"info": {
-		"name": "Monity — Finance Tracker API",
-		"description": "Complete API collection for Monity finance tracker backend.\n\n**Setup:**\n1. Set `base_url` variable (e.g. `http://localhost:8080` or `https://api-assetmonitor.my.id`)\n2. Call Login/Register — token is auto-saved to `token` variable\n3. All authenticated requests use `{{token}}` in Bearer header\n\n**Variable auto-capture:**\n- Login/Register → `token`, `refresh_token`\n- Create Asset → `asset_uuid`, `cash_asset_uuid` (if CASH)\n- Create Expense → `expense_uuid`\n- Create Income → `income_uuid`\n- Create Saving Goal → `saving_goal_uuid`\n\n**Default currency:** IDR (all endpoints default to IDR if no `?currency=` param)",
+		"name": "MoneyTor — Finance Tracker API",
+		"description": "Complete API collection for MoneyTor finance tracker backend.\n\n**Setup:**\n1. Set `base_url` variable (e.g. `http://localhost:8080` or `https://api-assetmonitor.my.id`)\n2. Call Login/Register — token is auto-saved to `token` variable\n3. All authenticated requests use `{{token}}` in Bearer header\n\n**Variable auto-capture:**\n- Login/Register → `token`, `refresh_token`\n- Create Asset → `asset_uuid`, `cash_asset_uuid` (if CASH)\n- Create Expense → `expense_uuid`\n- Create Income → `income_uuid`\n- Create Saving Goal → `saving_goal_uuid`\n\n**Default currency:** IDR (all endpoints default to IDR if no `?currency=` param)",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"variable": [

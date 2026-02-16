@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { MONITY_TOKEN } from "@/lib/auth/cookies";
+import { MoneyTor_TOKEN } from "@/lib/auth/cookies";
 
 const PROTECTED_PREFIX = "/dashboard";
 const PUBLIC_PATHS = ["/", "/login", "/register"];
@@ -14,7 +14,7 @@ function isPublic(pathname: string): boolean {
 }
 
 export function proxy(request: NextRequest) {
-  const token = request.cookies.get(MONITY_TOKEN)?.value;
+  const token = request.cookies.get(MoneyTor_TOKEN)?.value;
   const hasToken = !!token?.trim();
   const { pathname } = request.nextUrl;
 

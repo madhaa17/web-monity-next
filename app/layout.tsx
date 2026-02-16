@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist_Mono } from "next/font/google";
 import { Providers } from "./providers";
 import { Analytics } from "@vercel/analytics/next";
+import { PwaRegister } from "@/components/PwaRegister";
 import "./globals.css";
 
 const geistMono = Geist_Mono({
@@ -10,8 +11,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Monity",
+  title: "MoneyTor",
   description: "Finance tracker",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0a0a0a",
 };
 
 export default function RootLayout({
@@ -25,6 +34,7 @@ export default function RootLayout({
         <Providers>
           {children}
           <Analytics />
+          <PwaRegister />
         </Providers>
       </body>
     </html>

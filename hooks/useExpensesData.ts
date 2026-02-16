@@ -1,17 +1,29 @@
 "use client";
 
+import { useCallback } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import type { Asset, Expense } from "@/lib/api/types";
+import type { Asset, Expense, ListMeta } from "@/lib/api/types";
 import type { CreateExpenseFormValues, UpdateExpenseFormValues } from "@/lib/validations/expense";
 import { createExpense, deleteExpense, updateExpense } from "@/lib/api/expenses";
 import { expensesQueryKey, expensesQueryOptions } from "@/lib/queries/expenses";
 import { assetsQueryOptions } from "@/lib/queries/assets";
 import { invalidateOverviewQueries } from "@/lib/queries/overview";
+import { buildListSearchParams, getListParamsFromSearchParams } from "@/lib/url-list-params";
 import { toast } from "sonner";
 
 export interface UseExpensesDataResult {
   expenses: Expense[];
+  meta: ListMeta | undefined;
+  page: number;
+  setPage: (page: number) => void;
+  limit: number;
+  setLimit: (limit: number) => void;
+  month: string | undefined;
+  setMonth: (month: string | undefined) => void;
+  year: string | undefined;
+  setYear: (year: string | undefined) => void;
   assets: Asset[];
   cashAssets: Asset[];
   isLoading: boolean;
@@ -24,7 +36,45 @@ export interface UseExpensesDataResult {
 
 export function useExpensesData(): UseExpensesDataResult {
   const queryClient = useQueryClient();
-  const { data: expenses = [], isLoading: expensesLoading, isError, error } = useQuery(expensesQueryOptions());
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const { page, limit, month, year } = getListParamsFromSearchParams(searchParams);
+
+  const setPage = useCallback(
+    (p: number) => {
+      router.replace(`${pathname}?${buildListSearchParams({ page: p, limit, month, year })}`);
+    },
+    [pathname, router, limit, month, year]
+  );
+
+  const setLimit = useCallback(
+    (l: number) => {
+      router.replace(`${pathname}?${buildListSearchParams({ page: 1, limit: l, month, year })}`);
+    },
+    [pathname, router, month, year]
+  );
+
+  const setMonth = useCallback(
+    (m: string | undefined) => {
+      router.replace(`${pathname}?${buildListSearchParams({ page: 1, limit, month: m, year })}`);
+    },
+    [pathname, router, limit, year]
+  );
+
+  const setYear = useCallback(
+    (y: string | undefined) => {
+      router.replace(`${pathname}?${buildListSearchParams({ page: 1, limit, month, year: y })}`);
+    },
+    [pathname, router, limit, month]
+  );
+
+  const listParams = { page, limit, month, year };
+  const { data, isLoading: expensesLoading, isError, error } = useQuery(expensesQueryOptions(listParams));
+  const expenses = data?.items ?? [];
+  const meta = data?.meta;
+
   const { data: assets = [], isLoading: assetsLoading } = useQuery(assetsQueryOptions());
   const cashAssets = assets.filter((a) => a.type === "CASH");
   const isLoading = expensesLoading || assetsLoading;
@@ -75,6 +125,15 @@ export function useExpensesData(): UseExpensesDataResult {
 
   return {
     expenses,
+    meta,
+    page,
+    setPage,
+    limit,
+    setLimit,
+    month,
+    setMonth,
+    year,
+    setYear,
     assets,
     cashAssets,
     isLoading,

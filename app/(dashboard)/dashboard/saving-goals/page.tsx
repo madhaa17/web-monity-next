@@ -18,6 +18,10 @@ export default function SavingGoalsPage() {
 
   const {
     goals,
+    meta,
+    page,
+    setPage,
+    limit,
     isLoading,
     isError,
     error,
@@ -74,6 +78,10 @@ export default function SavingGoalsPage() {
   return (
     <SavingGoalsContent
       goals={goals}
+      meta={meta}
+      page={page}
+      setPage={setPage}
+      limit={limit}
       isLoading={isLoading}
       isError={isError}
       error={error}

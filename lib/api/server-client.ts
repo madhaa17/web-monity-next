@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { MONITY_TOKEN } from "@/lib/auth/cookies";
+import { MoneyTor_TOKEN } from "@/lib/auth/cookies";
 import { getBaseUrl } from "@/lib/api/client";
 
 /**
@@ -7,13 +7,13 @@ import { getBaseUrl } from "@/lib/api/client";
  */
 export async function getServerToken(): Promise<string | null> {
   const cookieStore = await cookies();
-  const value = cookieStore.get(MONITY_TOKEN)?.value;
+  const value = cookieStore.get(MoneyTor_TOKEN)?.value;
   if (value == null || value === "" || value === "undefined") return null;
   return value;
 }
 
 /**
- * Fetch from Monity backend with Authorization: Bearer from cookie. Use only on the server.
+ * Fetch from MoneyTor backend with Authorization: Bearer from cookie. Use only on the server.
  */
 export async function serverFetch<T>(
   path: string,

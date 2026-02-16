@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { MONITY_TOKEN, MONITY_REFRESH_TOKEN } from "@/lib/auth/cookies";
+import { MoneyTor_TOKEN, MoneyTor_REFRESH_TOKEN } from "@/lib/auth/cookies";
 
 function clearCookieOptions() {
   return {
@@ -10,7 +10,7 @@ function clearCookieOptions() {
 
 export async function POST() {
   const res = NextResponse.json({ success: true });
-  res.cookies.set(MONITY_TOKEN, "", clearCookieOptions());
-  res.cookies.set(MONITY_REFRESH_TOKEN, "", clearCookieOptions());
+  res.cookies.set(MoneyTor_TOKEN, "", clearCookieOptions());
+  res.cookies.set(MoneyTor_REFRESH_TOKEN, "", clearCookieOptions());
   return res;
 }

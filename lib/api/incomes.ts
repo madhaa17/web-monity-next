@@ -1,16 +1,20 @@
 import { apiClient } from "@/lib/api/client";
 import type { ApiResponse, Income, CreateIncomeBody, ListResponse } from "@/lib/api/types";
+import { buildListQuery, type ListDateFilterParams } from "@/lib/api/list-params";
 
-function extractListItems<T>(data: unknown): T[] {
-  if (data && typeof data === "object" && "items" in data && Array.isArray((data as ListResponse<T>).items))
-    return (data as ListResponse<T>).items;
-  if (Array.isArray(data)) return data as T[];
-  return [];
+function normalizeListResponse<T>(data: unknown): ListResponse<T> {
+  if (data && typeof data === "object" && "items" in data && Array.isArray((data as ListResponse<T>).items)) {
+    const r = data as ListResponse<T>;
+    return { items: r.items, meta: r.meta };
+  }
+  if (Array.isArray(data)) return { items: data as T[] };
+  return { items: [] };
 }
 
-export async function listIncomes(): Promise<Income[]> {
-  const res = await apiClient<ApiResponse<ListResponse<Income>>>("/incomes");
-  return extractListItems<Income>(res.data);
+export async function listIncomes(params?: ListDateFilterParams): Promise<ListResponse<Income>> {
+  const path = `/incomes${buildListQuery(params)}`;
+  const res = await apiClient<ApiResponse<ListResponse<Income>>>(path);
+  return normalizeListResponse<Income>(res.data);
 }
 
 export async function getIncome(uuid: string): Promise<Income> {

@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { MONITY_TOKEN, MONITY_REFRESH_TOKEN } from "@/lib/auth/cookies";
+import { MoneyTor_TOKEN, MoneyTor_REFRESH_TOKEN } from "@/lib/auth/cookies";
 import { getBaseUrl } from "@/lib/api/client";
 
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
@@ -19,7 +19,7 @@ function cookieOptions(maxAge: number, httpOnly: boolean) {
 
 export async function POST() {
   const cookieStore = await cookies();
-  const refreshToken = cookieStore.get(MONITY_REFRESH_TOKEN)?.value;
+  const refreshToken = cookieStore.get(MoneyTor_REFRESH_TOKEN)?.value;
 
   if (!refreshToken) {
     return NextResponse.json(
@@ -72,10 +72,10 @@ export async function POST() {
   }
 
   const res = NextResponse.json({ success: true });
-  res.cookies.set(MONITY_TOKEN, token, {
+  res.cookies.set(MoneyTor_TOKEN, token, {
     ...cookieOptions(ACCESS_TOKEN_MAX_AGE, false),
   });
-  res.cookies.set(MONITY_REFRESH_TOKEN, newRefreshToken, {
+  res.cookies.set(MoneyTor_REFRESH_TOKEN, newRefreshToken, {
     ...cookieOptions(REFRESH_TOKEN_MAX_AGE, true),
   });
 

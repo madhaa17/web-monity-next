@@ -1,12 +1,17 @@
 import { queryOptions } from "@tanstack/react-query";
 import * as incomesApi from "@/lib/api/incomes";
+import type { ListDateFilterParams } from "@/lib/api/list-params";
 
 export const incomesQueryKey = ["incomes"] as const;
 
-export function incomesQueryOptions() {
+export function incomesQueryKeyWithParams(params?: ListDateFilterParams) {
+  return [...incomesQueryKey, params ?? {}] as const;
+}
+
+export function incomesQueryOptions(params?: ListDateFilterParams) {
   return queryOptions({
-    queryKey: incomesQueryKey,
-    queryFn: () => incomesApi.listIncomes(),
+    queryKey: incomesQueryKeyWithParams(params),
+    queryFn: () => incomesApi.listIncomes(params),
   });
 }
 

@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Monity Finance Tracker API
+  title: MoneyTor Finance Tracker API
   description: Backend API for the finance tracker frontend. All dates/times are ISO 8601 / RFC3339. Authenticated endpoints require Bearer JWT.
   version: 1.0.0
 

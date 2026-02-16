@@ -130,7 +130,7 @@ export function PortfolioByTypeCard({ portfolio, assets }: PortfolioByTypeCardPr
                 className="border-b border-border/50 pb-4 last:border-0 last:pb-0"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-foreground uppercase">
+                  <span className="font-semibold text-foreground uppercase">
                     {TYPE_LABELS[type]}
                   </span>
                   <span className="text-sm font-semibold tabular-nums">
@@ -146,11 +146,11 @@ export function PortfolioByTypeCard({ portfolio, assets }: PortfolioByTypeCardPr
                     return (
                       <li
                         key={item.uuid}
-                        className="flex flex-col gap-0.5 text-muted-foreground"
+                        className="flex flex-col gap-0.5 text-foreground"
                       >
                         <div className="flex justify-between">
                           <span className="truncate">{item.name}</span>
-                          <span className="shrink-0 tabular-nums">
+                          <span className="shrink-0 tabular-nums text-foreground">
                             {formatCurrency(item.value, currency)}
                           </span>
                         </div>
@@ -158,8 +158,8 @@ export function PortfolioByTypeCard({ portfolio, assets }: PortfolioByTypeCardPr
                           <div
                             className={
                               profitLoss >= 0
-                                ? "text-right text-xs text-green-600 dark:text-green-500"
-                                : "text-right text-xs text-red-600 dark:text-red-500"
+                                ? "text-right text-sm text-green-600 dark:text-green-500"
+                                : "text-right text-sm text-red-600 dark:text-red-500"
                             }
                           >
                             {profitLoss >= 0 ? <TrendingUp className="w-4 h-4 inline-block mr-1" /> : <TrendingDown className="w-4 h-4 inline-block mr-1" />}

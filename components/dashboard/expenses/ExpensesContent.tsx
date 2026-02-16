@@ -1,15 +1,25 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { DateMonthYearFilter } from "@/components/dashboard/DateMonthYearFilter";
 import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
 import { ExpenseFormDialog } from "@/components/dashboard/expenses/ExpenseFormDialog";
 import { ExpenseList } from "@/components/dashboard/expenses/ExpenseList";
-import type { Asset, Expense } from "@/lib/api/types";
+import { Pagination } from "@/components/ui/pagination";
+import type { Asset, Expense, ListMeta } from "@/lib/api/types";
 import type { CreateExpenseFormValues, UpdateExpenseFormValues } from "@/lib/validations/expense";
 import { Plus } from "lucide-react";
 
 export interface ExpensesContentProps {
   expenses: Expense[];
+  meta: ListMeta | undefined;
+  page: number;
+  setPage: (page: number) => void;
+  limit: number;
+  month: string | undefined;
+  setMonth: (month: string | undefined) => void;
+  year: string | undefined;
+  setYear: (year: string | undefined) => void;
   assets: Asset[];
   cashAssets: Asset[];
   isLoading: boolean;
@@ -34,6 +44,14 @@ export interface ExpensesContentProps {
 
 export function ExpensesContent({
   expenses,
+  meta,
+  page,
+  setPage,
+  limit,
+  month,
+  setMonth,
+  year,
+  setYear,
   assets,
   cashAssets,
   isLoading,
@@ -55,6 +73,10 @@ export function ExpensesContent({
   isSubmitting,
   isDeleting,
 }: ExpensesContentProps) {
+  const totalPages = meta?.totalPages ?? 1;
+  const total = meta?.total;
+  const showPagination = !!meta;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -82,6 +104,13 @@ export function ExpensesContent({
         </p>
       )}
 
+      <DateMonthYearFilter
+        month={month}
+        year={year}
+        onMonthChange={setMonth}
+        onYearChange={setYear}
+      />
+
       <ExpenseList
         expenses={expenses}
         assets={assets}
@@ -89,6 +118,17 @@ export function ExpensesContent({
         onEdit={onEdit}
         onDelete={onDelete}
       />
+
+      {showPagination && (
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          limit={limit}
+          onPageChange={setPage}
+          disabled={isLoading}
+        />
+      )}
 
       <ExpenseFormDialog
         open={dialogOpen}

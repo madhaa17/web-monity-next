@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { ApiResponse } from "@/lib/api/types";
 import type { User } from "@/lib/api/types";
-import { MONITY_TOKEN, MONITY_REFRESH_TOKEN } from "@/lib/auth/cookies";
+import { MoneyTor_TOKEN, MoneyTor_REFRESH_TOKEN } from "@/lib/auth/cookies";
 import { serverFetch } from "@/lib/api/server-client";
 
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
@@ -42,10 +42,10 @@ export async function POST(request: Request) {
   }
 
   const res = NextResponse.json({ success: true });
-  res.cookies.set(MONITY_TOKEN, token, {
+  res.cookies.set(MoneyTor_TOKEN, token, {
     ...cookieOptions(ACCESS_TOKEN_MAX_AGE, false),
   });
-  res.cookies.set(MONITY_REFRESH_TOKEN, refreshToken, {
+  res.cookies.set(MoneyTor_REFRESH_TOKEN, refreshToken, {
     ...cookieOptions(REFRESH_TOKEN_MAX_AGE, true),
   });
 

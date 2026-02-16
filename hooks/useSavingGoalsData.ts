@@ -1,8 +1,10 @@
 "use client";
 
+import { useCallback } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import type { SavingGoal } from "@/lib/api/types";
+import type { ListMeta, SavingGoal } from "@/lib/api/types";
 import type {
   CreateSavingGoalFormValues,
   UpdateSavingGoalFormValues,
@@ -14,10 +16,16 @@ import {
 } from "@/lib/api/saving-goals";
 import { savingGoalsQueryKey, savingGoalsQueryOptions } from "@/lib/queries/saving-goals";
 import { invalidateOverviewQueries } from "@/lib/queries/overview";
+import { buildListSearchParams, getListParamsFromSearchParams } from "@/lib/url-list-params";
 import { toast } from "sonner";
 
 export interface UseSavingGoalsDataResult {
   goals: SavingGoal[];
+  meta: ListMeta | undefined;
+  page: number;
+  setPage: (page: number) => void;
+  limit: number;
+  setLimit: (limit: number) => void;
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
@@ -28,7 +36,33 @@ export interface UseSavingGoalsDataResult {
 
 export function useSavingGoalsData(): UseSavingGoalsDataResult {
   const queryClient = useQueryClient();
-  const { data: goals = [], isLoading, isError, error } = useQuery(savingGoalsQueryOptions());
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const { page, limit } = getListParamsFromSearchParams(searchParams);
+  const listParams = { page, limit };
+  const { data, isLoading, isError, error } = useQuery(savingGoalsQueryOptions(listParams));
+  const goals = data?.items ?? [];
+  const meta = data?.meta;
+
+  const setPage = useCallback(
+    (p: number) => {
+      router.replace(
+        `${pathname}?${buildListSearchParams({ page: p, limit, month: undefined, year: undefined })}`
+      );
+    },
+    [pathname, router, limit]
+  );
+
+  const setLimit = useCallback(
+    (l: number) => {
+      router.replace(
+        `${pathname}?${buildListSearchParams({ page: 1, limit: l, month: undefined, year: undefined })}`
+      );
+    },
+    [pathname, router]
+  );
 
   const createMutation = useMutation({
     mutationFn: (body: CreateSavingGoalFormValues) => {
@@ -109,6 +143,11 @@ export function useSavingGoalsData(): UseSavingGoalsDataResult {
 
   return {
     goals,
+    meta,
+    page,
+    setPage,
+    limit,
+    setLimit,
     isLoading,
     isError,
     error: error instanceof Error ? error : null,

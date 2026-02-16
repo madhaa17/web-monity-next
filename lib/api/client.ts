@@ -1,11 +1,11 @@
 /**
- * API client for Monity backend.
+ * API client for MoneyTor backend.
  * Token is stored in cookies: access token readable by client (for Authorization header),
  * refresh token httpOnly; set/clear/refresh via /api/auth/session, /api/auth/logout, /api/auth/refresh.
  */
 
 import Axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
-import { MONITY_TOKEN } from "@/lib/auth/cookies";
+import { MoneyTor_TOKEN } from "@/lib/auth/cookies";
 
 const API_PREFIX = "/api/v1";
 
@@ -37,7 +37,7 @@ function getCookie(name: string): string | null {
 /** Returns access token from cookie in browser; null on server or if invalid. */
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
-  return validToken(getCookie(MONITY_TOKEN));
+  return validToken(getCookie(MoneyTor_TOKEN));
 }
 
 /** Client cannot read httpOnly refresh token; returns null. Used only server-side in refresh route. */

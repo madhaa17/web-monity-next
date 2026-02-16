@@ -34,7 +34,7 @@ export function DashboardSidebar({
       <SidebarHeader className="flex h-14 shrink-0 items-center justify-center border-b border-sidebar-border px-2">
         <Link href="/dashboard" className="font-semibold text-2xl flex items-center text-primary dark:text-primary-foreground">
           <Coins className="size-6 shrink-0" />
-          <span className="ml-2">Monity</span>
+          <span className="ml-2">MoneyTor</span>
         </Link>
       </SidebarHeader>
       <SidebarContent>

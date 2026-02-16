@@ -1,15 +1,25 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { DateMonthYearFilter } from "@/components/dashboard/DateMonthYearFilter";
 import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
 import { IncomeFormDialog } from "@/components/dashboard/incomes/IncomeFormDialog";
 import { IncomeList } from "@/components/dashboard/incomes/IncomeList";
-import type { Asset, Income } from "@/lib/api/types";
+import { Pagination } from "@/components/ui/pagination";
+import type { Asset, Income, ListMeta } from "@/lib/api/types";
 import type { CreateIncomeFormValues, UpdateIncomeFormValues } from "@/lib/validations/income";
 import { Plus } from "lucide-react";
 
 export interface IncomesContentProps {
   incomes: Income[];
+  meta: ListMeta | undefined;
+  page: number;
+  setPage: (page: number) => void;
+  limit: number;
+  month: string | undefined;
+  setMonth: (month: string | undefined) => void;
+  year: string | undefined;
+  setYear: (year: string | undefined) => void;
   assets: Asset[];
   cashAssets: Asset[];
   isLoading: boolean;
@@ -34,6 +44,14 @@ export interface IncomesContentProps {
 
 export function IncomesContent({
   incomes,
+  meta,
+  page,
+  setPage,
+  limit,
+  month,
+  setMonth,
+  year,
+  setYear,
   assets,
   cashAssets,
   isLoading,
@@ -55,6 +73,10 @@ export function IncomesContent({
   isSubmitting,
   isDeleting,
 }: IncomesContentProps) {
+  const totalPages = meta?.totalPages ?? 1;
+  const total = meta?.total;
+  const showPagination = !!meta;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -82,6 +104,13 @@ export function IncomesContent({
         </p>
       )}
 
+      <DateMonthYearFilter
+        month={month}
+        year={year}
+        onMonthChange={setMonth}
+        onYearChange={setYear}
+      />
+
       <IncomeList
         incomes={incomes}
         assets={assets}
@@ -89,6 +118,17 @@ export function IncomesContent({
         onEdit={onEdit}
         onDelete={onDelete}
       />
+
+      {showPagination && (
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          limit={limit}
+          onPageChange={setPage}
+          disabled={isLoading}
+        />
+      )}
 
       <IncomeFormDialog
         open={dialogOpen}

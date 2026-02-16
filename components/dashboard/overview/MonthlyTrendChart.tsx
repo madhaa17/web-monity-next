@@ -7,8 +7,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import {
-  Area,
-  AreaChart,
+  Bar,
+  BarChart,
   CartesianGrid,
   XAxis,
   YAxis,
@@ -63,17 +63,23 @@ export function MonthlyTrendChart({ data, currency = DEFAULT_CURRENCY }: Monthly
             className="min-h-[200px] w-full aspect-auto"
             style={{ height: chartHeight }}
           >
-            <AreaChart
+            <BarChart
               data={series}
               margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+              accessibilityLayer
             >
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <CartesianGrid
+                vertical={false}
+                strokeDasharray="3 3"
+                className="stroke-muted"
+              />
               <XAxis
                 dataKey="month"
                 tickFormatter={formatMonthLabel}
                 tick={{ fontSize: tickFontSize }}
-                axisLine={false}
                 tickLine={false}
+                tickMargin={10}
+                axisLine={false}
               />
               <YAxis
                 tickFormatter={(v) =>
@@ -85,8 +91,10 @@ export function MonthlyTrendChart({ data, currency = DEFAULT_CURRENCY }: Monthly
                 width={yAxisWidth}
               />
               <ChartTooltip
+                cursor={false}
                 content={
                   <ChartTooltipContent
+                    indicator="dashed"
                     labelFormatter={(label) => formatMonthLabel(String(label))}
                     formatter={(value, name, item) => {
                       const color = (item.payload as { fill?: string })?.fill ?? item.color ?? "var(--muted-foreground)";
@@ -112,25 +120,9 @@ export function MonthlyTrendChart({ data, currency = DEFAULT_CURRENCY }: Monthly
                 }
               />
               <ChartLegend content={<ChartLegendContent />} />
-              <Area
-                type="monotone"
-                dataKey="income"
-                name="Income"
-                fill="var(--chart-1)"
-                fillOpacity={0.4}
-                stroke="var(--chart-1)"
-                strokeWidth={2}
-              />
-              <Area
-                type="monotone"
-                dataKey="expense"
-                name="Expense"
-                fill="var(--destructive)"
-                fillOpacity={0.4}
-                stroke="var(--destructive)"
-                strokeWidth={2}
-              />
-            </AreaChart>
+              <Bar dataKey="income" fill="var(--color-income)" radius={4} />
+              <Bar dataKey="expense" fill="var(--color-expense)" radius={4} />
+            </BarChart>
           </ChartContainer>
         )}
       </CardContent>

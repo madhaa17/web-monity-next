@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
 import { SavingGoalFormDialog } from "@/components/dashboard/saving-goals/SavingGoalFormDialog";
 import { SavingGoalList } from "@/components/dashboard/saving-goals/SavingGoalList";
-import type { SavingGoal } from "@/lib/api/types";
+import { Pagination } from "@/components/ui/pagination";
+import type { ListMeta, SavingGoal } from "@/lib/api/types";
 import type {
   CreateSavingGoalFormValues,
   UpdateSavingGoalFormValues,
@@ -13,6 +14,10 @@ import { Plus } from "lucide-react";
 
 export interface SavingGoalsContentProps {
   goals: SavingGoal[];
+  meta: ListMeta | undefined;
+  page: number;
+  setPage: (page: number) => void;
+  limit: number;
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
@@ -35,6 +40,10 @@ export interface SavingGoalsContentProps {
 
 export function SavingGoalsContent({
   goals,
+  meta,
+  page,
+  setPage,
+  limit,
   isLoading,
   isError,
   error,
@@ -54,6 +63,10 @@ export function SavingGoalsContent({
   isSubmitting,
   isDeleting,
 }: SavingGoalsContentProps) {
+  const totalPages = meta?.totalPages ?? 1;
+  const total = meta?.total;
+  const showPagination = !!meta;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -81,6 +94,17 @@ export function SavingGoalsContent({
         onEdit={onEdit}
         onDelete={onDelete}
       />
+
+      {showPagination && (
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          limit={limit}
+          onPageChange={setPage}
+          disabled={isLoading}
+        />
+      )}
 
       <SavingGoalFormDialog
         open={dialogOpen}

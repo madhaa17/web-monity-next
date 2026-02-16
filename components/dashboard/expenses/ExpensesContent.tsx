@@ -58,7 +58,12 @@ export function ExpensesContent({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Expenses</h1>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Expenses</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Record and manage your spending by category.
+          </p>
+        </div>
         <Button onClick={onAddClick} disabled={cashAssets.length === 0}>
           <Plus className="size-4" />
           Add expense

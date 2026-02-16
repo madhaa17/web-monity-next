@@ -58,7 +58,12 @@ export function IncomesContent({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Incomes</h1>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Incomes</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Record and manage your income sources.
+          </p>
+        </div>
         <Button onClick={onAddClick} disabled={cashAssets.length === 0}>
           <Plus className="size-4" />
           Add income

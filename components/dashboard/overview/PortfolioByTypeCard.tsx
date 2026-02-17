@@ -12,7 +12,8 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import Link from "next/link";
-import { Wallet, TrendingUp, TrendingDown } from "lucide-react";
+import { Wallet, TrendingUp, TrendingDown,ExternalLink } from "lucide-react";
+import { Tooltip, TooltipContent,TooltipTrigger } from "@/components/ui/tooltip";
 
 export interface PortfolioByTypeCardProps {
   portfolio: PortfolioSummary | undefined;
@@ -160,9 +161,17 @@ export function PortfolioByTypeCard({
                           {item.type === "CRYPTO" || item.type === "STOCK" ? (
                             <Link
                               href={`/dashboard/assets/${item.uuid}`}
-                              className="truncate underline"
+                              className="truncate flex items-center gap-1"
                             >
                               {item.name}
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>asset details</p>
+                                </TooltipContent>
+                              </Tooltip>
                             </Link>
                           ) : (
                             <span className="truncate">{item.name}</span>

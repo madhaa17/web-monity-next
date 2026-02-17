@@ -9,7 +9,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Wallet, ArrowDownCircle, ArrowUpCircle, Coins, HandCoins, ArrowRightLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useShowAmountStore } from "@/stores/useShowAmountStore";
+import { Wallet, ArrowDownCircle, ArrowUpCircle, Coins, HandCoins, ArrowRightLeft, Eye, EyeOff } from "lucide-react";
+
+const MASKED_AMOUNT = "••••••••";
 
 export interface OverviewSummaryCardsProps {
   portfolio: PortfolioSummary | undefined;
@@ -24,6 +28,8 @@ export function OverviewSummaryCards({
   cashflow,
   overview,
 }: OverviewSummaryCardsProps) {
+  const showAmount = useShowAmountStore((s) => s.showAmount);
+  const toggleShowAmount = useShowAmountStore((s) => s.toggleShowAmount);
   const currency = portfolio?.currency ?? DEFAULT_CURRENCY;
   const totalValue = toNumber(portfolio?.totalValue ?? overview?.totalAssets);
   const income = toNumber(cashflow?.income ?? cashflow?.totalIncome ?? overview?.monthlyIncome);
@@ -38,74 +44,99 @@ export function OverviewSummaryCards({
   const amountClass =
     "text-sm font-bold tabular-nums min-w-0 @[140px]:text-base @[180px]:text-lg @[220px]:text-xl @[280px]:text-2xl";
 
+  const displayAmount = (value: number, curr: string) =>
+    showAmount ? formatCurrency(value, curr) : MASKED_AMOUNT;
+
+  const titleClass = "min-w-0 truncate text-sm font-medium text-muted-foreground";
+
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-6">
       <Card className="border-border/80 @container">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
+        <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+          <CardTitle className={titleClass}>
             Total Assets value
           </CardTitle>
-          <Wallet className="size-4 shrink-0 text-muted-foreground" />
+          <div className="flex shrink-0 items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground "
+              onClick={toggleShowAmount}
+              aria-label={showAmount ? "Hide amounts" : "Show amounts"}
+            >
+              {showAmount ? (
+                <Eye className="size-4" />
+              ) : (
+                <EyeOff className="size-4" />
+              )}
+            </Button>
+            <Wallet className="size-4 shrink-0 text-muted-foreground" />
+          </div>
         </CardHeader>
         <CardContent>
           <p className={amountClass}>
-            {formatCurrency(totalValue, currency)}
+            {displayAmount(totalValue, currency)}
           </p>
         </CardContent>
       </Card>
       <Card className="border-border/80 @container">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
+        <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+          <CardTitle className={titleClass}>
             Income (this month)
           </CardTitle>
           <ArrowUpCircle className="size-4 shrink-0 text-green-600 dark:text-green-500" />
         </CardHeader>
         <CardContent>
-          <p className={`${amountClass} text-green-600 dark:text-green-500`}>
-            {formatCurrency(income, currency)}
+          <p
+            className={`${amountClass} ${showAmount ? "text-green-600 dark:text-green-500" : "text-foreground"}`}
+          >
+            {displayAmount(income, currency)}
           </p>
         </CardContent>
       </Card>
       <Card className="border-border/80 @container">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
+        <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+          <CardTitle className={titleClass}>
             Expense (this month)
           </CardTitle>
           <ArrowDownCircle className="size-4 shrink-0 text-red-600 dark:text-red-500" />
         </CardHeader>
         <CardContent>
-          <p className={`${amountClass} text-red-600 dark:text-red-500`}>
-            {formatCurrency(expense, currency)}
+          <p
+            className={`${amountClass} ${showAmount ? "text-red-600 dark:text-red-500" : "text-foreground"}`}
+          >
+            {displayAmount(expense, currency)}
           </p>
         </CardContent>
       </Card>
       <Card className="border-border/80 @container">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
+        <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+          <CardTitle className={titleClass}>
             Net saving
           </CardTitle>
           <Coins className="size-4 shrink-0 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <p
-            className={`${amountClass} ${hasNet && net >= 0 ? "text-green-600 dark:text-green-500" : hasNet && net < 0 ? "text-red-600 dark:text-red-500" : ""}`}
+            className={`${amountClass} ${showAmount ? (hasNet && net >= 0 ? "text-green-600 dark:text-green-500" : hasNet && net < 0 ? "text-red-600 dark:text-red-500" : "") : "text-foreground"}`}
           >
-            {formatCurrency(net, currency)}
+            {displayAmount(net, currency)}
           </p>
-          
         </CardContent>
       </Card>
       <Link href="/dashboard/debts">
         <Card className="border-border/80 @container transition-colors hover:bg-muted/50">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+            <CardTitle className={titleClass}>
               Total debt
             </CardTitle>
             <HandCoins className="size-4 shrink-0 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className={`${amountClass} text-red-600 dark:text-red-500`}>
-              {formatCurrency(totalDebt, currency)}
+            <p
+              className={`${amountClass} ${showAmount ? "text-red-600 dark:text-red-500" : "text-foreground"}`}
+            >
+              {displayAmount(totalDebt, currency)}
             </p>
             {debtOverdueCount > 0 && (
               <p className="mt-1 text-xs text-destructive">
@@ -117,15 +148,17 @@ export function OverviewSummaryCards({
       </Link>
       <Link href="/dashboard/receivables">
         <Card className="border-border/80 @container transition-colors hover:bg-muted/50">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+            <CardTitle className={titleClass}>
               Total receivable
             </CardTitle>
             <ArrowRightLeft className="size-4 shrink-0 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className={`${amountClass} text-green-600 dark:text-green-500`}>
-              {formatCurrency(totalReceivable, currency)}
+            <p
+              className={`${amountClass} ${showAmount ? "text-green-600 dark:text-green-500" : "text-foreground"}`}
+            >
+              {displayAmount(totalReceivable, currency)}
             </p>
             {receivableOverdueCount > 0 && (
               <p className="mt-1 text-xs text-amber-600 dark:text-amber-500">

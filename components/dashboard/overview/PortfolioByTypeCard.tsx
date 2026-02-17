@@ -3,6 +3,7 @@
 import type { Asset, AssetType, PortfolioSummary } from "@/lib/api/types";
 import { formatCurrency, toNumber } from "@/lib/format";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useShowAmountStore } from "@/stores/useShowAmountStore";
 import {
   Empty,
   EmptyDescription,
@@ -19,6 +20,7 @@ export interface PortfolioByTypeCardProps {
 }
 
 const DEFAULT_CURRENCY = "IDR";
+const MASKED_AMOUNT = "••••••••";
 
 const TYPE_ORDER: AssetType[] = [
   "CRYPTO",
@@ -102,10 +104,13 @@ export function PortfolioByTypeCard({
   portfolio,
   assets,
 }: PortfolioByTypeCardProps) {
+  const showAmount = useShowAmountStore((s) => s.showAmount);
   const currency = portfolio?.currency ?? DEFAULT_CURRENCY;
   const valueByUuid = buildValueByUuid(portfolio);
   const costByUuid = buildCostByUuid(assets);
   const groups = groupByType(assets, valueByUuid);
+  const displayAmount = (value: number) =>
+    showAmount ? formatCurrency(value, currency) : MASKED_AMOUNT;
 
   return (
     <Card>
@@ -137,7 +142,7 @@ export function PortfolioByTypeCard({
                     {TYPE_LABELS[type]}
                   </span>
                   <span className="text-sm font-semibold tabular-nums">
-                    {formatCurrency(total, currency)}
+                    {displayAmount(total)}
                   </span>
                 </div>
                 <ul className="mt-2 space-y-2 pl-2 text-sm">
@@ -162,25 +167,27 @@ export function PortfolioByTypeCard({
                           ) : (
                             <span className="truncate">{item.name}</span>
                           )}
-                          <span className="truncate">{item.name}</span>
                           <span className="shrink-0 tabular-nums text-foreground">
-                            {formatCurrency(item.value, currency)}
+                            {displayAmount(item.value)}
                           </span>
                         </div>
                         {showProfitLoss ? (
                           <div
                             className={
-                              profitLoss >= 0
-                                ? "text-right text-sm text-green-600 dark:text-green-500"
-                                : "text-right text-sm text-red-600 dark:text-red-500"
+                              showAmount
+                                ? profitLoss >= 0
+                                  ? "text-right text-sm text-green-600 dark:text-green-500"
+                                  : "text-right text-sm text-red-600 dark:text-red-500"
+                                : "text-right text-sm text-foreground"
                             }
                           >
-                            {profitLoss >= 0 ? (
-                              <TrendingUp className="w-4 h-4 inline-block mr-1" />
-                            ) : (
-                              <TrendingDown className="w-4 h-4 inline-block mr-1" />
-                            )}
-                            {formatCurrency(profitLoss, currency)}
+                            {showAmount &&
+                              (profitLoss >= 0 ? (
+                                <TrendingUp className="w-4 h-4 inline-block mr-1" />
+                              ) : (
+                                <TrendingDown className="w-4 h-4 inline-block mr-1" />
+                              ))}
+                            {displayAmount(profitLoss)}
                           </div>
                         ) : null}
                       </li>

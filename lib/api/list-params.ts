@@ -22,3 +22,18 @@ export function buildListQuery(params?: ListDateFilterParams): string {
   const q = search.toString();
   return q ? `?${q}` : "";
 }
+
+/** Build query string from any params object (e.g. debts/receivables: page, limit, status, due_from, due_to). */
+export function buildQueryFromParams(
+  params?: Record<string, string | number | undefined | null>
+): string {
+  if (!params || Object.keys(params).length === 0) return "";
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== "") {
+      search.set(key, String(value));
+    }
+  }
+  const q = search.toString();
+  return q ? `?${q}` : "";
+}

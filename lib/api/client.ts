@@ -74,6 +74,11 @@ function isRefreshRequest(config: { url?: string; baseURL?: string }): boolean {
   return url.includes("auth/refresh");
 }
 
+function isAuthLoginOrRegisterRequest(config: { url?: string }): boolean {
+  const url = config.url ?? "";
+  return url.includes("auth/login") || url.includes("auth/register");
+}
+
 const REFRESH_ROUTE = "/api/auth/refresh";
 
 const baseURL = `${getBaseUrl().replace(/\/$/, "")}${API_PREFIX}`;
@@ -96,12 +101,17 @@ apiAxios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config;
 });
 
-/** Backend error payload: { success: false, message: "..." } or { error: "..." } */
+/** Backend error payload: { success: false, message: "...", errors: { message: "..." } } or { error: "..." } */
 function getApiErrorMessage(data: unknown): string | null {
   if (data == null) return null;
   if (typeof data === "string") return data;
   if (typeof data !== "object") return null;
   const obj = data as Record<string, unknown>;
+  const errors = obj.errors;
+  if (errors != null && typeof errors === "object") {
+    const nested = (errors as Record<string, unknown>).message;
+    if (typeof nested === "string") return nested;
+  }
   const msg = obj.message ?? obj.error ?? obj.msg;
   return typeof msg === "string" ? msg : null;
 }
@@ -116,6 +126,14 @@ apiAxios.interceptors.response.use(
         getApiErrorMessage(error.response?.data) ??
         error.message ??
         `Request failed (${error.response?.status ?? "error"})`;
+      return Promise.reject(new Error(message));
+    }
+
+    if (isAuthLoginOrRegisterRequest(originalRequest)) {
+      const message =
+        getApiErrorMessage(error.response?.data) ??
+        error.message ??
+        "Login failed";
       return Promise.reject(new Error(message));
     }
 

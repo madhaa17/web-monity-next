@@ -100,6 +100,55 @@ export interface SavingGoal {
   [key: string]: unknown;
 }
 
+/** Debt and receivable status (OpenAPI enum) */
+export type DebtReceivableStatus = "PENDING" | "PARTIAL" | "PAID" | "OVERDUE";
+
+export interface Debt {
+  uuid: string;
+  partyName: string;
+  amount: number;
+  paidAmount: number;
+  dueDate: string | null;
+  status: DebtReceivableStatus;
+  note: string | null;
+  createdAt: string;
+  updatedAt: string;
+  asset?: Asset | null;
+  [key: string]: unknown;
+}
+
+export interface DebtPayment {
+  uuid: string;
+  amount: number;
+  date: string;
+  note?: string | null;
+  createdAt: string;
+  [key: string]: unknown;
+}
+
+export interface Receivable {
+  uuid: string;
+  partyName: string;
+  amount: number;
+  paidAmount: number;
+  dueDate: string | null;
+  status: DebtReceivableStatus;
+  note: string | null;
+  createdAt: string;
+  updatedAt: string;
+  asset?: Asset | null;
+  [key: string]: unknown;
+}
+
+export interface ReceivablePayment {
+  uuid: string;
+  amount: number;
+  date: string;
+  note?: string | null;
+  createdAt: string;
+  [key: string]: unknown;
+}
+
 export interface PortfolioSummary {
   totalValue?: number;
   currency?: string;
@@ -146,6 +195,10 @@ export interface FinancialOverview {
   monthlyExpense?: number;
   monthlyNetSaving?: number;
   monthlyTrend?: MonthlyTrendPoint[];
+  totalDebt?: number;
+  totalReceivable?: number;
+  debtOverdueCount?: number;
+  receivableOverdueCount?: number;
   [key: string]: unknown;
 }
 
@@ -186,6 +239,52 @@ export interface CreateSavingGoalBody {
   targetAmount: number;
   currentAmount: number;
   deadline?: string;
+}
+
+export interface CreateDebtRequest {
+  partyName: string;
+  amount: number;
+  dueDate?: string | null;
+  note?: string | null;
+  assetUuid?: string | null;
+}
+
+export interface UpdateDebtRequest {
+  partyName?: string | null;
+  amount?: number | null;
+  dueDate?: string | null;
+  note?: string | null;
+  assetUuid?: string | null;
+}
+
+export interface CreateDebtPaymentRequest {
+  amount: number;
+  date: string;
+  note?: string | null;
+  assetUuid?: string | null;
+}
+
+export interface CreateReceivableRequest {
+  partyName: string;
+  amount: number;
+  dueDate?: string | null;
+  note?: string | null;
+  assetUuid?: string | null;
+}
+
+export interface UpdateReceivableRequest {
+  partyName?: string | null;
+  amount?: number | null;
+  dueDate?: string | null;
+  note?: string | null;
+  assetUuid?: string | null;
+}
+
+export interface CreateReceivablePaymentRequest {
+  amount: number;
+  date: string;
+  note?: string | null;
+  assetUuid?: string | null;
 }
 
 /** One point in a price chart time series (from /prices/crypto|stock/{symbol}/chart). */

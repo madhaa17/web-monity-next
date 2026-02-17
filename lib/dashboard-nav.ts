@@ -1,9 +1,11 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  TrendingDown,
+  ArrowRightLeft,
   BarChart3,
+  HandCoins,
   LayoutDashboard,
   Target,
+  TrendingDown,
   TrendingUp,
   Wallet,
 } from "lucide-react";
@@ -20,5 +22,7 @@ export const dashboardNavItems: DashboardNavItem[] = [
   { href: "/dashboard/incomes", label: "Incomes", icon: TrendingUp },
   { href: "/dashboard/expenses", label: "Expenses", icon: TrendingDown },
   { href: "/dashboard/saving-goals", label: "Saving goals", icon: Target },
+  { href: "/dashboard/debts", label: "Debts", icon: HandCoins },
+  { href: "/dashboard/receivables", label: "Receivables", icon: ArrowRightLeft },
   { href: "/dashboard/insights", label: "Insights", icon: BarChart3 },
 ];

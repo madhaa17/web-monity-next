@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { login } from "@/lib/api/auth";
 import type { LoginFormValues } from "@/lib/validations/auth";
 import { loginSchema } from "@/lib/validations/auth";
@@ -33,13 +34,19 @@ export function useLoginForm() {
         if (sessionRes.ok) {
           router.push("/dashboard");
         } else {
-          setApiError("Failed to set session");
+          const msg = "Failed to set session";
+          setApiError(msg);
+          toast.error(msg);
         }
       } else {
-        setApiError("Invalid response from server");
+        const msg = "Invalid response from server";
+        setApiError(msg);
+        toast.error(msg);
       }
     } catch (err) {
-      setApiError(err instanceof Error ? err.message : "Login failed");
+      const message = err instanceof Error ? err.message : "Login failed";
+      setApiError(message);
+      toast.error(message);
     }
   }
 

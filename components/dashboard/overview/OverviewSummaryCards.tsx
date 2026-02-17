@@ -50,8 +50,8 @@ export function OverviewSummaryCards({
   const titleClass = "min-w-0 truncate text-sm font-medium text-muted-foreground";
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-6">
-      <Card className="border-border/80 @container">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-6 items-stretch">
+      <Card className="h-full border-border/80 @container flex flex-col">
         <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
           <CardTitle className={titleClass}>
             Total Assets value
@@ -79,7 +79,7 @@ export function OverviewSummaryCards({
           </p>
         </CardContent>
       </Card>
-      <Card className="border-border/80 @container">
+      <Card className="h-full border-border/80 @container flex flex-col">
         <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
           <CardTitle className={titleClass}>
             Income (this month)
@@ -94,7 +94,7 @@ export function OverviewSummaryCards({
           </p>
         </CardContent>
       </Card>
-      <Card className="border-border/80 @container">
+      <Card className="h-full border-border/80 @container flex flex-col">
         <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
           <CardTitle className={titleClass}>
             Expense (this month)
@@ -109,7 +109,7 @@ export function OverviewSummaryCards({
           </p>
         </CardContent>
       </Card>
-      <Card className="border-border/80 @container">
+      <Card className="h-full border-border/80 @container flex flex-col">
         <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
           <CardTitle className={titleClass}>
             Net saving
@@ -124,8 +124,8 @@ export function OverviewSummaryCards({
           </p>
         </CardContent>
       </Card>
-      <Link href="/dashboard/debts">
-        <Card className="border-border/80 @container transition-colors hover:bg-muted/50">
+      <Link href="/dashboard/debts" className="h-full min-h-0">
+        <Card className="h-full border-border/80 @container flex flex-col transition-colors hover:bg-muted/50">
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className={titleClass}>
               Total debt
@@ -146,8 +146,8 @@ export function OverviewSummaryCards({
           </CardContent>
         </Card>
       </Link>
-      <Link href="/dashboard/receivables">
-        <Card className="border-border/80 @container transition-colors hover:bg-muted/50">
+      <Link href="/dashboard/receivables" className="h-full min-h-0">
+        <Card className="h-full border-border/80 @container flex flex-col transition-colors hover:bg-muted/50">
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className={titleClass}>
               Total receivable

@@ -72,6 +72,14 @@ export function PriceChart({
   const tickFontSize = isMobile ? 10 : 11;
   const yAxisWidth = isMobile ? 32 : 40;
 
+  const firstPrice = series[0]?.price;
+  const lastPrice = series[series.length - 1]?.price;
+  const priceUp =
+    firstPrice != null &&
+    lastPrice != null &&
+    lastPrice >= firstPrice;
+  const lineStroke = priceUp ? "hsl(142, 76%, 36%)" : "hsl(0, 84%, 60%)";
+
   const title = symbol ? `Price chart — ${symbol}` : "Price chart";
   const showRangeSelect = rangeOptions && rangeOptions.length > 0 && selectedRange != null && onRangeChange;
 
@@ -145,7 +153,7 @@ export function PriceChart({
                 type="monotone"
                 dataKey="price"
                 name="Price"
-                stroke="var(--chart-1)"
+                stroke={lineStroke}
                 strokeWidth={2}
                 dot={false}
               />

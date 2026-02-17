@@ -43,6 +43,8 @@ export interface AssetListProps {
   isLoading?: boolean;
   onEdit: (asset: Asset) => void;
   onDelete: (asset: Asset) => void;
+  /** For non-CRYPTO/STOCK assets: open detail in dialog instead of navigating. */
+  onViewDetail?: (asset: Asset) => void;
 }
 
 export function AssetList({
@@ -50,6 +52,7 @@ export function AssetList({
   isLoading,
   onEdit,
   onDelete,
+  onViewDetail,
 }: AssetListProps) {
   const columns = [
     columnHelper.accessor("name", {
@@ -102,19 +105,32 @@ export function AssetList({
       header: () => <span className="w-[140px]" />,
       cell: ({ row }) => {
         const asset = row.original;
+        const isDetailPage = asset.type === "CRYPTO" || asset.type === "STOCK";
         return (
           <div className="flex gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              asChild
-              aria-label="View detail"
-            >
-              <Link href={`/dashboard/assets/${asset.uuid}`}>
+            {isDetailPage ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                asChild
+                aria-label="View detail"
+              >
+                <Link href={`/dashboard/assets/${asset.uuid}`}>
+                  <Eye className="size-4" />
+                </Link>
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => onViewDetail?.(asset)}
+                aria-label="View detail"
+              >
                 <Eye className="size-4" />
-              </Link>
-            </Button>
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"

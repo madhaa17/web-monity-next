@@ -62,7 +62,6 @@ export function AssetDetailContent({
   chartData,
   chartLoading,
   chartError,
-  showChart,
   isCrypto,
   isStock,
   symbol,
@@ -153,6 +152,16 @@ export function AssetDetailContent({
             <div className="flex justify-between">
               <span className="text-muted-foreground">Symbol</span>
               <span>{symbol}</span>
+            </div>
+          ) : null}
+          {(isCrypto || isStock) &&
+          currentValue != null &&
+          quantity > 0 ? (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Last price</span>
+              <span className="tabular-nums font-medium">
+                {formatCurrency(currentValue / quantity, currency)}
+              </span>
             </div>
           ) : null}
         </CardContent>

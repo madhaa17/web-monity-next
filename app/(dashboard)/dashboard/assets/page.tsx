@@ -12,6 +12,8 @@ export default function AssetsPage() {
   const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
   const [assetToDelete, setAssetToDelete] = useState<Asset | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [assetToView, setAssetToView] = useState<Asset | null>(null);
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
 
   const {
     assets,
@@ -32,6 +34,16 @@ export default function AssetsPage() {
   const handleDelete = (asset: Asset) => {
     setAssetToDelete(asset);
     setDeleteDialogOpen(true);
+  };
+
+  const handleViewDetail = (asset: Asset) => {
+    setAssetToView(asset);
+    setDetailDialogOpen(true);
+  };
+
+  const handleDetailDialogOpenChange = (open: boolean) => {
+    setDetailDialogOpen(open);
+    if (!open) setAssetToView(null);
   };
 
   const handleAddClick = () => {
@@ -79,9 +91,13 @@ export default function AssetsPage() {
       editingAsset={editingAsset}
       assetToDelete={assetToDelete}
       deleteDialogOpen={deleteDialogOpen}
+      assetToView={assetToView}
+      detailDialogOpen={detailDialogOpen}
       onAddClick={handleAddClick}
       onEdit={handleEdit}
       onDelete={handleDelete}
+      onViewDetail={handleViewDetail}
+      onDetailDialogOpenChange={handleDetailDialogOpenChange}
       onDialogOpenChange={handleDialogOpenChange}
       onDeleteDialogOpenChange={handleDeleteDialogOpenChange}
       onCreate={handleCreate}

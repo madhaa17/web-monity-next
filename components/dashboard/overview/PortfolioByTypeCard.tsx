@@ -10,6 +10,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import Link from "next/link";
 import { Wallet, TrendingUp, TrendingDown } from "lucide-react";
 
 export interface PortfolioByTypeCardProps {
@@ -37,7 +38,9 @@ const TYPE_LABELS: Record<AssetType, string> = {
   OTHER: "Other",
 };
 
-function buildValueByUuid(portfolio: PortfolioSummary | undefined): Map<string, number> {
+function buildValueByUuid(
+  portfolio: PortfolioSummary | undefined,
+): Map<string, number> {
   const map = new Map<string, number>();
   const list = portfolio?.assets;
   if (!Array.isArray(list)) return map;
@@ -69,12 +72,9 @@ interface GroupItem {
 
 function groupByType(
   assets: Asset[],
-  valueByUuid: Map<string, number>
+  valueByUuid: Map<string, number>,
 ): { type: AssetType; total: number; items: GroupItem[] }[] {
-  const byType = new Map<
-    AssetType,
-    { total: number; items: GroupItem[] }
-  >();
+  const byType = new Map<AssetType, { total: number; items: GroupItem[] }>();
   for (const asset of assets) {
     const type = (asset.type ?? "OTHER") as AssetType;
     const value = valueByUuid.get(asset.uuid) ?? 0;
@@ -98,7 +98,10 @@ function groupByType(
 
 const SHOW_PROFIT_LOSS_TYPES: AssetType[] = ["CRYPTO", "STOCK"];
 
-export function PortfolioByTypeCard({ portfolio, assets }: PortfolioByTypeCardProps) {
+export function PortfolioByTypeCard({
+  portfolio,
+  assets,
+}: PortfolioByTypeCardProps) {
   const currency = portfolio?.currency ?? DEFAULT_CURRENCY;
   const valueByUuid = buildValueByUuid(portfolio);
   const costByUuid = buildCostByUuid(assets);
@@ -149,6 +152,16 @@ export function PortfolioByTypeCard({ portfolio, assets }: PortfolioByTypeCardPr
                         className="flex flex-col gap-0.5 text-foreground"
                       >
                         <div className="flex justify-between">
+                          {item.type === "CRYPTO" || item.type === "STOCK" ? (
+                            <Link
+                              href={`/dashboard/assets/${item.uuid}`}
+                              className="truncate underline"
+                            >
+                              {item.name}
+                            </Link>
+                          ) : (
+                            <span className="truncate">{item.name}</span>
+                          )}
                           <span className="truncate">{item.name}</span>
                           <span className="shrink-0 tabular-nums text-foreground">
                             {formatCurrency(item.value, currency)}
@@ -162,7 +175,11 @@ export function PortfolioByTypeCard({ portfolio, assets }: PortfolioByTypeCardPr
                                 : "text-right text-sm text-red-600 dark:text-red-500"
                             }
                           >
-                            {profitLoss >= 0 ? <TrendingUp className="w-4 h-4 inline-block mr-1" /> : <TrendingDown className="w-4 h-4 inline-block mr-1" />}
+                            {profitLoss >= 0 ? (
+                              <TrendingUp className="w-4 h-4 inline-block mr-1" />
+                            ) : (
+                              <TrendingDown className="w-4 h-4 inline-block mr-1" />
+                            )}
                             {formatCurrency(profitLoss, currency)}
                           </div>
                         ) : null}

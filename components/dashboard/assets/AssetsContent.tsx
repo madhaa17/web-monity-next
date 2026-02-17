@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
+import { AssetDetailDialog } from "@/components/dashboard/assets/AssetDetailDialog";
 import { AssetFormDialog } from "@/components/dashboard/assets/AssetFormDialog";
 import { AssetList } from "@/components/dashboard/assets/AssetList";
 import type { Asset } from "@/lib/api/types";
@@ -18,9 +19,13 @@ export interface AssetsContentProps {
   editingAsset: Asset | null;
   assetToDelete: Asset | null;
   deleteDialogOpen: boolean;
+  assetToView: Asset | null;
+  detailDialogOpen: boolean;
   onAddClick: () => void;
   onEdit: (asset: Asset) => void;
   onDelete: (asset: Asset) => void;
+  onViewDetail: (asset: Asset) => void;
+  onDetailDialogOpenChange: (open: boolean) => void;
   onDialogOpenChange: (open: boolean) => void;
   onDeleteDialogOpenChange: (open: boolean) => void;
   onCreate: (data: CreateAssetFormValues) => Promise<void>;
@@ -40,9 +45,13 @@ export function AssetsContent({
   editingAsset,
   assetToDelete,
   deleteDialogOpen,
+  assetToView,
+  detailDialogOpen,
   onAddClick,
   onEdit,
   onDelete,
+  onViewDetail,
+  onDetailDialogOpenChange,
   onDialogOpenChange,
   onDeleteDialogOpenChange,
   onCreate,
@@ -77,6 +86,7 @@ export function AssetsContent({
         isLoading={isLoading}
         onEdit={onEdit}
         onDelete={onDelete}
+        onViewDetail={onViewDetail}
       />
 
       <AssetFormDialog
@@ -87,6 +97,12 @@ export function AssetsContent({
         onSubmitCreate={onCreate}
         onSubmitEdit={onEditSubmit}
         isSubmitting={isSubmitting}
+      />
+
+      <AssetDetailDialog
+        open={detailDialogOpen}
+        onOpenChange={onDetailDialogOpenChange}
+        asset={assetToView}
       />
 
       <DeleteConfirmDialog

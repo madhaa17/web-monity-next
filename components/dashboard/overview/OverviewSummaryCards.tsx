@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { TrendingUp, Wallet, ArrowDownCircle, ArrowUpCircle, Coins, HandCoins, ArrowRightLeft } from "lucide-react";
+import { Wallet, ArrowDownCircle, ArrowUpCircle, Coins, HandCoins, ArrowRightLeft } from "lucide-react";
 
 export interface OverviewSummaryCardsProps {
   portfolio: PortfolioSummary | undefined;
@@ -29,7 +29,6 @@ export function OverviewSummaryCards({
   const income = toNumber(cashflow?.income ?? cashflow?.totalIncome ?? overview?.monthlyIncome);
   const expense = toNumber(cashflow?.expense ?? cashflow?.totalExpense ?? overview?.monthlyExpense);
   const net = toNumber(cashflow?.netSaving ?? overview?.monthlyNetSaving) || income - expense;
-  const savingRate = toNumber(cashflow?.savingRate);
   const hasNet = income > 0 || expense > 0;
   const totalDebt = toNumber(overview?.totalDebt);
   const totalReceivable = toNumber(overview?.totalReceivable);
@@ -93,12 +92,7 @@ export function OverviewSummaryCards({
           >
             {formatCurrency(net, currency)}
           </p>
-          {savingRate > 0 && (
-            <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-              <TrendingUp className="size-3" />
-              {savingRate.toFixed(0)}% saving rate
-            </p>
-          )}
+          
         </CardContent>
       </Card>
       <Link href="/dashboard/debts">
@@ -110,7 +104,7 @@ export function OverviewSummaryCards({
             <HandCoins className="size-4 shrink-0 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className={amountClass}>
+            <p className={`${amountClass} text-red-600 dark:text-red-500`}>
               {formatCurrency(totalDebt, currency)}
             </p>
             {debtOverdueCount > 0 && (

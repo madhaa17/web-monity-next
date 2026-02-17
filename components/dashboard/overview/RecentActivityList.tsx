@@ -16,7 +16,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Activity, ArrowDownCircle, ArrowRightLeft, ArrowUpCircle } from "lucide-react";
+import { Activity, ArrowDownCircle, ArrowRightLeft, ArrowUpCircle, HandCoins } from "lucide-react";
 
 export interface RecentActivityListProps {
   activities: ActivityItem[];
@@ -123,7 +123,8 @@ export function RecentActivityList({
                   : isReceivable
                     ? "text-amber-600 dark:text-amber-500"
                     : "text-red-600 dark:text-red-500";
-              const showArrowRightLeft = isReceivable || isPayable;
+              const showArrowRightLeft = isReceivable;
+              const showHandCoins = isPayable;
               return (
                 <li
                   key={item.uuid ?? index}
@@ -137,6 +138,8 @@ export function RecentActivityList({
                       <ArrowUpCircle className="size-5" />
                     ) : showArrowRightLeft ? (
                       <ArrowRightLeft className="size-5" />
+                    ) : showHandCoins ? (
+                      <HandCoins className="size-5" />
                     ) : (
                       <ArrowDownCircle className="size-5" />
                     )}

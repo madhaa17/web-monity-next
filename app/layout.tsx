@@ -13,6 +13,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "MoneyTor",
   description: "Finance tracker",
+  manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

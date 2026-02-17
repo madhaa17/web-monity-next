@@ -1,5 +1,4 @@
 import { apiClient } from "@/lib/api/client";
-import type { ApiResponse } from "@/lib/api/types";
 
 /**
  * Query params for GET /activities (see Postman: Activities).
@@ -33,8 +32,22 @@ export function getActivitiesTodayParams(tz?: string): ActivitiesParams {
   return params;
 }
 
+/** Activity type from GET /activities (grouped by day/month/year). */
+export type ActivityItemType = "receivable" | "payable" | "debt" | "expense" | "income";
+
 export interface ActivityItem {
-  [key: string]: unknown;
+  type: ActivityItemType;
+  uuid: string;
+  amount: string;
+  date: string;
+  createdAt: string;
+  note?: string;
+  /** Present for type === "receivable" | type === "payable" */
+  partyName?: string;
+  /** Present for type === "expense" */
+  category?: string;
+  /** Present for type === "income" */
+  source?: string;
 }
 
 function buildQuery(params?: ActivitiesParams): string {
@@ -47,10 +60,10 @@ function buildQuery(params?: ActivitiesParams): string {
   return q ? `?${q}` : "";
 }
 
-/** Backend response when group_by is used: data.groups[].key, data.groups[].items */
-interface ActivitiesGroupedResponse {
+/** Backend response: { success, message, data: { groups: [{ key, items }] } } */
+interface ActivitiesApiResponse {
   data?: {
-    groups?: Array<{ key?: string; items?: ActivityItem[] }>;
+    groups?: Array<{ key: string; items: ActivityItem[] }>;
   };
 }
 
@@ -58,13 +71,10 @@ export async function listActivities(
   params?: ActivitiesParams
 ): Promise<ActivityItem[]> {
   const path = `/activities${buildQuery(params)}`;
-  const res = await apiClient<
-    ApiResponse<ActivityItem[]> & ActivitiesGroupedResponse
-  >(path);
-  const data = res.data ?? (res as unknown as Record<string, unknown>);
-  if (data && typeof data === "object" && Array.isArray((data as { groups?: unknown }).groups)) {
-    const groups = (data as { groups: Array<{ items?: ActivityItem[] }> }).groups;
+  const res = await apiClient<ActivitiesApiResponse>(path);
+  const groups = res.data?.groups;
+  if (Array.isArray(groups)) {
     return groups.flatMap((g) => g.items ?? []);
   }
-  return Array.isArray(data) ? data : [];
+  return [];
 }

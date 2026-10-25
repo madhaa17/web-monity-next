@@ -58,37 +58,50 @@ export interface Asset {
   [key: string]: unknown;
 }
 
-/** Expense categories */
-export type ExpenseCategory =
-  | "FOOD"
-  | "TRANSPORT"
-  | "HOUSING"
-  | "UTILITIES"
-  | "HEALTH"
-  | "ENTERTAINMENT"
-  | "SHOPPING"
-  | "OTHER";
+/** Income and expense records share most fields; "kind" selects the API resource. */
+export type TransactionKind = "income" | "expense";
+
+export type CategoryType = "INCOME" | "EXPENSE";
+
+/** User-defined income or expense category (GET /categories) */
+export interface Category {
+  uuid: string;
+  type: CategoryType;
+  name: string;
+  /** Hex color like #22C55E */
+  color?: string | null;
+  icon?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 export interface Expense {
   uuid: string;
+  /** Decimal string from the API, e.g. "25000" */
+  amount: number | string;
+  categoryUuid: string;
+  /** Category name */
+  category: string;
   assetUuid: string;
-  amount: number;
-  category: ExpenseCategory;
+  assetName: string;
   note?: string;
   date: string;
-  asset?: Asset | null;
+  createdAt?: string;
   [key: string]: unknown;
 }
 
-export interface Income {
-  uuid: string;
-  assetUuid: string;
-  amount: number;
-  source?: string;
-  note?: string;
-  date: string;
-  asset?: Asset | null;
-  [key: string]: unknown;
+export interface Income extends Expense {
+  source: string;
+}
+
+/** Totals for the incomes or expenses matching a list filter (GET /expenses/summary, /incomes/summary) */
+export interface TransactionSummary {
+  total: number | string;
+  count: number;
+  average: number | string;
+  byCategory: CategoryTotal[];
+  groupBy: "day" | "month";
+  series: Array<{ period: string; total: number | string; count: number }>;
 }
 
 export interface SavingGoal {
@@ -158,8 +171,12 @@ export interface PortfolioSummary {
 
 /** One category total in cashflow (expenseByCategory) */
 export interface CategoryTotal {
+  categoryUuid?: string;
+  /** Category name */
   category: string;
-  total: number;
+  color?: string | null;
+  total: number | string;
+  count?: number;
   percentage?: number;
 }
 
@@ -218,20 +235,20 @@ export interface RefreshBody {
   refresh_token: string;
 }
 
-export interface CreateExpenseBody {
+/** Body for creating or updating an income/expense; source is required for incomes only. */
+export interface TransactionBody {
   assetUuid: string;
   amount: number;
-  category: ExpenseCategory;
+  categoryUuid: string;
+  source?: string;
   note?: string;
   date: string;
 }
 
-export interface CreateIncomeBody {
-  assetUuid: string;
-  amount: number;
-  source: string;
-  note?: string;
-  date: string;
+export interface CategoryBody {
+  type: CategoryType;
+  name: string;
+  color?: string;
 }
 
 export interface CreateSavingGoalBody {

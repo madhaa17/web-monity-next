@@ -11,7 +11,32 @@ export interface ListDateFilterParams {
   year?: string;
 }
 
-export function buildListQuery(params?: ListDateFilterParams): string {
+/** Sort order for income/expense lists */
+export type TransactionSort = "-date" | "date" | "-amount" | "amount";
+
+/** Filters shared by income/expense lists and their summaries. */
+export interface TransactionFilterParams {
+  date_from?: string;
+  date_to?: string;
+  month?: string;
+  year?: string;
+  /** Comma-separated category UUIDs */
+  category?: string;
+  /** Asset UUID */
+  asset?: string;
+  /** Searches note (and source for incomes) */
+  q?: string;
+  min_amount?: string;
+  max_amount?: string;
+}
+
+export interface TransactionListParams extends TransactionFilterParams {
+  page?: number;
+  limit?: number;
+  sort?: TransactionSort;
+}
+
+export function buildListQuery(params?: ListDateFilterParams | TransactionListParams): string {
   if (!params || Object.keys(params).length === 0) return "";
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {

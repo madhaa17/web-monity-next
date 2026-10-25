@@ -1,7 +1,8 @@
 "use client";
 
 import type { CategoryTotal } from "@/lib/api/types";
-import { formatCurrency } from "@/lib/format";
+import { categoryColor } from "@/lib/category-color";
+import { formatCurrency, toNumber } from "@/lib/format";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
@@ -12,26 +13,6 @@ const DEFAULT_CURRENCY = "IDR";
 const chartConfig = {
   name: { label: "Category" },
   total: { label: "Total" },
-};
-
-/** Warna chart dari globals.css (--chart-1 s.d. --chart-5) */
-const CHART_COLORS = [
-  "var(--chart-1)",
-  "var(--chart-2)",
-  "var(--chart-3)",
-  "var(--chart-4)",
-  "var(--chart-5)",
-];
-
-const CATEGORY_LABELS: Record<string, string> = {
-  FOOD: "Food",
-  TRANSPORT: "Transport",
-  HOUSING: "Housing",
-  UTILITIES: "Utilities",
-  HEALTH: "Health",
-  ENTERTAINMENT: "Entertainment",
-  SHOPPING: "Shopping",
-  OTHER: "Other",
 };
 
 export interface ExpenseByCategoryChartProps {
@@ -45,9 +26,11 @@ export function ExpenseByCategoryChart({
 }: ExpenseByCategoryChartProps) {
   const items = Array.isArray(data) && data.length > 0 ? data : [];
   const chartData = items.map((d) => ({
-    name: CATEGORY_LABELS[d.category] ?? d.category,
-    total: d.total,
+    name: d.category,
+    total: toNumber(d.total),
     percentage: d.percentage,
+    // Same color as the category's dot on the incomes/expenses pages.
+    fill: categoryColor({ color: d.color, uuid: d.categoryUuid, name: d.category }),
   }));
   const isMobile = useIsMobile();
   const chartHeight = isMobile ? 220 : 260;
@@ -108,8 +91,8 @@ export function ExpenseByCategoryChart({
                 }
               />
               <Bar dataKey="total" radius={[0, 4, 4, 0]} maxBarSize={maxBarSize}>
-                {chartData.map((_, i) => (
-                  <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                {chartData.map((d) => (
+                  <Cell key={d.name} fill={d.fill} />
                 ))}
               </Bar>
             </BarChart>

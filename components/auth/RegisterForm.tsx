@@ -11,6 +11,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export interface RegisterFormProps {
   register: UseFormRegister<RegisterFormValues>;
@@ -64,9 +65,8 @@ export function RegisterForm({
         <Field>
           <FieldLabel htmlFor="password">Password</FieldLabel>
           <FieldContent>
-            <Input
+            <PasswordInput
               id="password"
-              type="password"
               autoComplete="new-password"
               placeholder="********"
               aria-invalid={!!errors.password}

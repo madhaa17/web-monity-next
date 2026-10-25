@@ -11,6 +11,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export interface LoginFormProps {
   register: UseFormRegister<LoginFormValues>;
@@ -50,9 +51,8 @@ export function LoginForm({
         <Field>
           <FieldLabel htmlFor="password">Password</FieldLabel>
           <FieldContent>
-            <Input
+            <PasswordInput
               id="password"
-              type="password"
               placeholder="********"
               autoComplete="current-password"
               aria-invalid={!!errors.password}

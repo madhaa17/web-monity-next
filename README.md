@@ -7,8 +7,11 @@ A personal finance web app for tracking **assets**, **expenses**, **incomes**, a
 - **Authentication** — Login and register; JWT stored in cookies (access token readable, refresh token httpOnly). Route protection via Next.js proxy (middleware); session and refresh handled by API routes.
 - **Dashboard** — Overview with portfolio summary, cashflow, monthly trends, expense-by-category charts, recent activity, and saving-goal progress. Initial overview data can be server-rendered (hybrid SSR/CSR).
 - **Assets** — List and manage assets (cash, crypto, stock, etc.); view asset detail with price chart.
-- **Expenses** — List and manage expenses by category; requires at least one CASH asset.
-- **Incomes** — List and manage income entries; requires at least one CASH asset.
+- **Incomes & expenses** — One shared page per kind (`components/dashboard/transactions/`), both requiring at least one CASH asset:
+  - Add, edit and delete; the amount moves in or out of the chosen cash asset, and the server rejects expenses larger than the balance (the form stays open with the message).
+  - Custom categories with colors, managed from the **Categories** dialog; deleting a used category moves its transactions to another one.
+  - Filters for period, category, cash asset, search and sort. They live in the URL, so reloads and shared links keep them.
+  - Summary card (total, count, average, per-category breakdown) that follows the active filters; clicking a category filters the list.
 - **Insights** — Monthly cashflow (income, expense, net saving, saving rate) and charts (trends, expense by category).
 - **Saving goals** — Create and track goals with target amount, current amount, and optional deadline.
 
@@ -25,9 +28,10 @@ A personal finance web app for tracking **assets**, **expenses**, **incomes**, a
 
 - `app/` — Routes: `/` (landing), `/login`, `/register`, `/dashboard` (overview, assets, expenses, incomes, insights, saving-goals)
 - `app/api/auth/` — Session (set/read cookies), logout, refresh
-- `components/` — UI primitives and dashboard blocks (overview, assets, expenses, incomes, insights, saving-goals)
-- `hooks/` — Data hooks (e.g. `useOverviewData`, `useAssetsData`, `useExpensesData`), auth (`useAuth`, `useToken`, `useDashboardAuth`), forms
+- `components/` — UI primitives and dashboard blocks (overview, assets, transactions, insights, saving-goals, …)
+- `hooks/` — Data hooks (e.g. `useOverviewData`, `useAssetsData`, `useTransactionsData`, `useTransactionFilters`), auth (`useAuth`, `useToken`, `useDashboardAuth`), forms
 - `lib/` — API client, server client, auth cookies, queries, validations, formatting
+- `docs/` — Copies of the backend OpenAPI spec and Postman collection (source of truth: `backend/docs/`)
 - `proxy.ts` — Route protection and redirects (replaces deprecated `middleware.ts` in Next.js 16)
 
 ## Getting started

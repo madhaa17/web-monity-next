@@ -40,6 +40,7 @@ export function useAssetsData(): UseAssetsDataResult {
         purchaseCurrency: body.purchaseCurrency,
         totalCost: body.totalCost ?? body.purchasePrice * body.quantity,
         ...(body.symbol?.trim() && { symbol: body.symbol.trim() }),
+        ...(body.notes?.trim() && { notes: body.notes.trim() }),
       });
     },
     onSuccess: () => {

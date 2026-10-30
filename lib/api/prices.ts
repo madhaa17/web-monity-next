@@ -1,8 +1,14 @@
 import { apiClient } from "@/lib/api/client";
-import type { ApiResponse, PriceChartPoint } from "@/lib/api/types";
+import type {
+  ApiResponse,
+  PriceChartPoint,
+  PriceChartSeries,
+  PriceQuote,
+  SymbolSearchResult,
+} from "@/lib/api/types";
 import { toNumber } from "@/lib/format";
 
-/** Crypto chart: backend whitelist days = 1, 7, 14, 30, 90 (default 7). Hanya kirim days (+ currency). */
+/** Crypto chart: backend whitelist days = 1, 7, 14, 30, 90, 180, 365 (default 7). Hanya kirim days (+ currency). */
 export interface CryptoChartParams {
   currency?: string;
   days?: number;
@@ -46,31 +52,60 @@ function normalizeChartData(raw: unknown): PriceChartPoint[] {
     }
     const price = toNumber(o.p ?? o.price ?? o.value ?? o.close);
     return { time, price };
-  }).filter((p) => p.time);
+  }).filter((p) => p.time && p.price > 0);
+}
+
+export type PricedAssetType = "CRYPTO" | "STOCK";
+
+/** Search tickers for the symbol picker (Yahoo for stocks, CoinGecko for crypto). */
+export async function searchSymbols(
+  type: PricedAssetType,
+  q: string
+): Promise<SymbolSearchResult[]> {
+  const res = await apiClient<ApiResponse<SymbolSearchResult[]>>(
+    `/prices/search${buildQuery({ type, q })}`
+  );
+  return Array.isArray(res.data) ? res.data : [];
+}
+
+/** Current price per unit of a symbol, converted to currency (default IDR). */
+export async function getPriceQuote(
+  type: PricedAssetType,
+  symbol: string,
+  currency = "IDR"
+): Promise<PriceQuote> {
+  const path = `/prices/${type === "CRYPTO" ? "crypto" : "stock"}/${encodeURIComponent(symbol)}${buildQuery({ currency })}`;
+  const res = await apiClient<ApiResponse<PriceQuote>>(path);
+  return { ...res.data, price: toNumber(res.data.price) };
 }
 
 export async function getCryptoChart(
   symbol: string,
   params?: CryptoChartParams
-): Promise<PriceChartPoint[]> {
+): Promise<PriceChartSeries> {
   const query = buildQuery(params as Record<string, string | number | undefined>);
   const path = `/prices/crypto/${encodeURIComponent(symbol)}/chart${query}`;
   const res = await apiClient<ApiResponse<unknown>>(path);
-  const raw = res.data;
-  const arr = extractChartArray(raw);
-  return normalizeChartData(arr);
+  return toChartSeries(res.data);
 }
 
 export async function getStockChart(
   symbol: string,
   params?: StockChartParams
-): Promise<PriceChartPoint[]> {
+): Promise<PriceChartSeries> {
   const query = buildQuery(params as Record<string, string | number | undefined>);
   const path = `/prices/stock/${encodeURIComponent(symbol)}/chart${query}`;
   const res = await apiClient<ApiResponse<unknown>>(path);
-  const raw = res.data;
-  const arr = extractChartArray(raw);
-  return normalizeChartData(arr);
+  return toChartSeries(res.data);
+}
+
+/** Read points and currency from a chart response ({ symbol, currency, data: [] } or a bare array). */
+function toChartSeries(raw: unknown): PriceChartSeries {
+  const currency =
+    raw && typeof raw === "object" && "currency" in raw && typeof raw.currency === "string" && raw.currency
+      ? raw.currency.toUpperCase()
+      : undefined;
+  return { currency, points: normalizeChartData(extractChartArray(raw)) };
 }
 
 /** Extract chart series from API: either data is array or data.data is array (e.g. { symbol, currency, data: [] }). */

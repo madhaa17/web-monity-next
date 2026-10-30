@@ -30,6 +30,30 @@ export function formatCurrency(
 }
 
 /**
+ * Format a per-unit market price. Unlike formatCurrency it keeps the significant decimals of small
+ * prices (a coin at Rp 0,0799 would otherwise show as Rp 0).
+ */
+export function formatUnitPrice(
+  amount: number,
+  currency: string = DEFAULT_CURRENCY
+): string {
+  const abs = Math.abs(amount);
+  const maximumFractionDigits =
+    abs === 0 || abs >= 100 ? 0 : Math.min(8, 3 - Math.floor(Math.log10(abs)));
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits,
+  }).format(amount);
+}
+
+/** Format an asset quantity, keeping up to 8 decimals (crypto amounts such as 0,00012 BTC). */
+export function formatQuantity(quantity: number): string {
+  return quantity.toLocaleString("id-ID", { maximumFractionDigits: 8 });
+}
+
+/**
  * Format number as IDR display string with dot as thousands separator (e.g. 1500000 -> "1.500.000").
  * No currency symbol; for use inside inputs with separate prefix.
  */
@@ -49,6 +73,35 @@ export function parseIdrInput(str: string): number {
   if (cleaned === "") return 0;
   const n = parseFloat(cleaned);
   return Number.isNaN(n) ? 0 : n;
+}
+
+/** Format for a decimal IDR input: dots group thousands, a comma starts the fraction (0,089166). */
+export function formatIdrDecimalDisplay(value: number, decimals: number): string {
+  if (!Number.isFinite(value)) return "";
+  return value.toLocaleString("id-ID", { maximumFractionDigits: decimals });
+}
+
+/** Parse a decimal IDR input ("1.500,25" -> 1500.25). */
+export function parseIdrDecimalInput(str: string): number {
+  const cleaned = str.replace(/\./g, "").replace(",", ".").trim();
+  if (cleaned === "" || cleaned === ".") return 0;
+  const n = parseFloat(cleaned);
+  return Number.isNaN(n) ? 0 : n;
+}
+
+/**
+ * Normalise text while it is typed into a decimal IDR input: regroup the whole part and keep the
+ * fraction as typed (so "0," and "0,00" survive until the next digit). Dots are always thousands
+ * separators, matching formatIdrDisplay.
+ */
+export function typingIdrDecimal(raw: string, decimals: number): string {
+  const s = raw.replace(/[^\d.,]/g, "");
+  const [wholeRaw, ...rest] = s.split(",");
+  const whole = wholeRaw.replace(/\./g, "").replace(/^0+(?=\d)/, "");
+  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  if (rest.length === 0) return grouped;
+  const fraction = rest.join("").replace(/\./g, "").slice(0, decimals);
+  return `${grouped || "0"},${fraction}`;
 }
 
 /**

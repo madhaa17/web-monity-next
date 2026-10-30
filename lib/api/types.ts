@@ -304,10 +304,60 @@ export interface CreateReceivablePaymentRequest {
   assetUuid?: string | null;
 }
 
+/** Current value of one asset (GET /portfolio/assets/{uuid}). Decimals arrive as strings. */
+export interface AssetValue {
+  uuid: string;
+  quantity: number | string;
+  currentPrice: number | string;
+  value: number | string;
+  currency: string;
+  /** e.g. "yahoo", "coingecko", "fallback" (purchase price), "manual_update". */
+  priceSource: string;
+  /** When the market price was fetched; absent for manual or purchase prices. */
+  priceAsOf?: string;
+  /** The market source was unreachable; currentPrice is the last price fetched (at priceAsOf). */
+  priceStale?: boolean;
+  /** Units per lot when quantity is counted in lots (IDX stocks: 100). */
+  lotSize?: number;
+}
+
+/** One ticker match from GET /prices/search, used by the asset form's symbol picker. */
+export interface SymbolSearchResult {
+  /** Value to store on the asset: BBCA.JK / AAPL for stocks, BTC for crypto. */
+  symbol: string;
+  name: string;
+  exchange?: string;
+  /** EQUITY, ETF or COIN. */
+  kind?: string;
+  /** CoinGecko id the crypto ticker resolves to. */
+  coinId?: string;
+  /** CoinGecko market-cap rank. */
+  rank?: number;
+  /** Units per lot when quantity is counted in lots (IDX stocks: 100). */
+  lotSize?: number;
+}
+
+/** Current market price (GET /prices/{crypto|stock}/{symbol}). price is per unit (per share, not per lot). */
+export interface PriceQuote {
+  symbol: string;
+  price: number;
+  currency: string;
+  source: string;
+  fetchedAt: string;
+  lotSize?: number;
+  stale?: boolean;
+}
+
 /** One point in a price chart time series (from /prices/crypto|stock/{symbol}/chart). */
 export interface PriceChartPoint {
   time: string;
   price: number;
+}
+
+/** A price chart with the currency its prices are in (a US stock's chart is in USD, not IDR). */
+export interface PriceChartSeries {
+  currency?: string;
+  points: PriceChartPoint[];
 }
 
 export interface CreateAssetBody {

@@ -8,8 +8,5 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });
 
-// Some browsers require a fetch handler for installability checks.
-// Keep it as a pass-through to avoid caching authenticated pages/API.
-self.addEventListener("fetch", (event) => {
-  event.respondWith(fetch(event.request));
-});
+// No fetch handler: requests go straight to the network, so a failed request fails normally
+// instead of as an unhandled rejection inside the worker. Browsers no longer need one to install.

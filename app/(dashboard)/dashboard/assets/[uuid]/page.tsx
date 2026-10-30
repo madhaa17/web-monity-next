@@ -37,11 +37,17 @@ export default function AssetDetailPage() {
     isStock,
     showChart,
     chartData,
+    chartCurrency,
     chartLoading,
     chartError,
     quantity,
     totalCost,
     currentValue,
+    currentPrice,
+    lotSize,
+    priceSource,
+    priceAsOf,
+    priceStale,
     showProfitLoss,
     profitLoss,
   } = useAssetDetailData(uuid, chartRange);
@@ -109,9 +115,15 @@ export default function AssetDetailPage() {
       quantity={quantity}
       totalCost={totalCost}
       currentValue={currentValue}
+      currentPrice={currentPrice}
+      lotSize={lotSize}
+      priceSource={priceSource}
+      priceAsOf={priceAsOf}
+      priceStale={priceStale}
       showProfitLoss={showProfitLoss}
       profitLoss={profitLoss}
       chartData={chartData}
+      chartCurrency={chartCurrency}
       chartLoading={chartLoading}
       chartError={chartError}
       showChart={showChart}

@@ -2,34 +2,54 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { formatIdrDisplay, parseIdrInput } from "@/lib/format";
+import {
+  formatIdrDecimalDisplay,
+  formatIdrDisplay,
+  parseIdrDecimalInput,
+  parseIdrInput,
+  typingIdrDecimal,
+} from "@/lib/format";
 
 export interface CurrencyInputProps
   extends Omit<React.ComponentProps<"input">, "value" | "onChange" | "type"> {
   value: number;
   onChange: (value: number) => void;
   prefix?: string;
+  /** Fraction digits the user may type after a comma (e.g. 8 for a sub-rupiah coin price). Default 0. */
+  decimals?: number;
 }
 
 const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
   (
-    { className, value, onChange, prefix = "IDR ", id, disabled, "aria-invalid": ariaInvalid, ...props },
+    { className, value, onChange, prefix = "IDR ", decimals = 0, id, disabled, "aria-invalid": ariaInvalid, ...props },
     ref
   ) => {
-    const [displayValue, setDisplayValue] = React.useState(() =>
-      formatIdrDisplay(value)
+    const format = React.useCallback(
+      (v: number) => (decimals > 0 ? formatIdrDecimalDisplay(v, decimals) : formatIdrDisplay(v)),
+      [decimals]
     );
+    const parse = React.useCallback(
+      (s: string) => (decimals > 0 ? parseIdrDecimalInput(s) : parseIdrInput(s)),
+      [decimals]
+    );
+    const [displayValue, setDisplayValue] = React.useState(() => format(value));
     const isControlled = value !== undefined && value !== null;
 
     React.useEffect(() => {
+      // Only resync when the value changed from outside, so a half-typed "0," is not wiped.
       if (isControlled) {
-        const formatted = formatIdrDisplay(value);
-        setDisplayValue(formatted);
+        setDisplayValue((shown) => (parse(shown) === value ? shown : format(value)));
       }
-    }, [value, isControlled]);
+    }, [value, isControlled, format, parse]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const raw = e.target.value;
+      if (decimals > 0) {
+        const shown = typingIdrDecimal(raw, decimals);
+        setDisplayValue(shown);
+        onChange(parseIdrDecimalInput(shown));
+        return;
+      }
       const num = parseIdrInput(raw);
       setDisplayValue(formatIdrDisplay(num));
       onChange(num);
@@ -52,7 +72,7 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
         <input
           ref={ref}
           type="text"
-          inputMode="numeric"
+          inputMode={decimals > 0 ? "decimal" : "numeric"}
           autoComplete="off"
           id={id}
           disabled={disabled}

@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-table";
 import Link from "next/link";
 import type { Asset } from "@/lib/api/types";
-import { formatCurrency, toNumber } from "@/lib/format";
+import { formatCurrency, formatQuantity, toNumber } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -80,7 +80,10 @@ export function AssetList({
           <span className="tabular-nums text-right">
             {isCash
               ? formatCurrency(quantity, currency)
-              : quantity.toLocaleString("id-ID")}
+              : formatQuantity(quantity)}
+            {asset.type === "STOCK" && asset.symbol?.toUpperCase().endsWith(".JK") ? (
+              <span className="text-muted-foreground"> lot</span>
+            ) : null}
           </span>
         );
       },

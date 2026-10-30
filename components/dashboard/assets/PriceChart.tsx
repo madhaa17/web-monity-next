@@ -1,7 +1,7 @@
 "use client";
 
 import type { PriceChartPoint } from "@/lib/api/types";
-import { formatCurrency } from "@/lib/format";
+import { formatUnitPrice } from "@/lib/format";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
@@ -30,14 +30,41 @@ const chartConfig = {
   },
 };
 
-function formatTimeLabel(timeStr: string): string {
+const INTRADAY_SPAN_MS = 2 * 24 * 60 * 60 * 1000;
+
+function formatTimeLabel(timeStr: string, intraday = false): string {
   const date = new Date(timeStr);
   if (Number.isNaN(date.getTime())) return timeStr;
+  if (intraday) {
+    return new Intl.DateTimeFormat("id-ID", { hour: "2-digit", minute: "2-digit" }).format(date);
+  }
   return new Intl.DateTimeFormat("id-ID", {
     day: "numeric",
     month: "short",
     year: date.getFullYear() !== new Date().getFullYear() ? "2-digit" : undefined,
   }).format(date);
+}
+
+function formatTooltipTime(timeStr: string, intraday: boolean): string {
+  const date = new Date(timeStr);
+  if (Number.isNaN(date.getTime())) return timeStr;
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    ...(intraday ? { hour: "2-digit", minute: "2-digit" } : {}),
+  }).format(date);
+}
+
+/** Y-axis label: full price with thousands separators (4.520), compact from a million (1,7 M), decimals for small prices. */
+function formatPriceTick(v: number): string {
+  const abs = Math.abs(v);
+  if (abs >= 1e6) {
+    return new Intl.NumberFormat("id-ID", { notation: "compact", maximumFractionDigits: 2 }).format(v);
+  }
+  const maximumFractionDigits =
+    abs === 0 || abs >= 100 ? 0 : Math.min(8, 3 - Math.floor(Math.log10(abs)));
+  return new Intl.NumberFormat("id-ID", { maximumFractionDigits }).format(v);
 }
 
 export interface PriceChartRangeOption {
@@ -70,7 +97,16 @@ export function PriceChart({
   const isMobile = useIsMobile();
   const chartHeight = isMobile ? 220 : 260;
   const tickFontSize = isMobile ? 10 : 11;
-  const yAxisWidth = isMobile ? 32 : 40;
+
+  const prices = series.map((p) => p.price);
+  const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
+  const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
+  const longestTick = Math.max(formatPriceTick(minPrice).length, formatPriceTick(maxPrice).length);
+  const yAxisWidth = Math.max(32, longestTick * (tickFontSize - 3) + 12);
+
+  const firstTime = series.length > 0 ? new Date(series[0].time).getTime() : NaN;
+  const lastTime = series.length > 0 ? new Date(series[series.length - 1].time).getTime() : NaN;
+  const intraday = lastTime - firstTime < INTRADAY_SPAN_MS;
 
   const firstPrice = series[0]?.price;
   const lastPrice = series[series.length - 1]?.price;
@@ -122,20 +158,23 @@ export function PriceChart({
           >
             <LineChart
               data={series}
-              margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+              margin={{ top: 8, right: 0, left: 8, bottom: 0 }}
             >
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis
                 dataKey="time"
-                tickFormatter={formatTimeLabel}
+                tickFormatter={(v) => formatTimeLabel(String(v), intraday)}
                 tick={{ fontSize: tickFontSize }}
                 axisLine={false}
                 tickLine={false}
+                // Default "preserveEnd" hides the first label when it overflows the left edge.
+                interval="preserveStartEnd"
+                minTickGap={24}
               />
               <YAxis
-                tickFormatter={(v) =>
-                  v >= 1e6 ? `${v / 1e6}M` : v >= 1e3 ? `${v / 1e3}K` : String(v)
-                }
+                domain={["auto", "auto"]}
+                orientation="right"
+                tickFormatter={formatPriceTick}
                 tick={{ fontSize: tickFontSize }}
                 axisLine={false}
                 tickLine={false}
@@ -144,18 +183,19 @@ export function PriceChart({
               <ChartTooltip
                 content={
                   <ChartTooltipContent
-                    labelFormatter={(label) => formatTimeLabel(String(label))}
-                    formatter={(value) => formatCurrency(Number(value), currency)}
+                    labelFormatter={(label) => formatTooltipTime(String(label), intraday)}
+                    formatter={(value) => formatUnitPrice(Number(value), currency)}
                   />
                 }
               />
               <Line
-                type="monotone"
+                type="linear"
                 dataKey="price"
                 name="Price"
                 stroke={lineStroke}
                 strokeWidth={2}
                 dot={false}
+                isAnimationActive={false}
               />
             </LineChart>
           </ChartContainer>

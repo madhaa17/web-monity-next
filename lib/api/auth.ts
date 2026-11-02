@@ -6,6 +6,7 @@ import type {
   LoginBody,
   RegisterBody,
   RefreshBody,
+  ChangePasswordBody,
 } from "@/lib/api/types";
 
 /** Backend may return token/refreshToken (camelCase) or Token/RefreshToken (PascalCase). */
@@ -46,6 +47,15 @@ export async function refresh(refreshToken: string): Promise<AuthResponse> {
   const res = await apiClient<ApiResponse<AuthResponse>>("/auth/refresh", {
     method: "POST",
     body: { refresh_token: refreshToken } as unknown as Record<string, unknown>,
+  });
+  return normalizeAuthData(res.data);
+}
+
+/** Changes the password; the backend signs out other sessions and returns a new token pair. */
+export async function changePassword(body: ChangePasswordBody): Promise<AuthResponse> {
+  const res = await apiClient<ApiResponse<AuthResponse>>("/auth/password", {
+    method: "PUT",
+    body: body as unknown as Record<string, unknown>,
   });
   return normalizeAuthData(res.data);
 }

@@ -81,6 +81,22 @@ function isAuthLoginOrRegisterRequest(config: { url?: string }): boolean {
 
 const REFRESH_ROUTE = "/api/auth/refresh";
 
+let refreshInFlight: Promise<boolean> | null = null;
+
+/**
+ * Refreshes the session once for all requests that hit 401 together. Each refresh rotates the
+ * refresh token, so parallel refreshes would race to overwrite the cookie.
+ */
+function refreshSession(): Promise<boolean> {
+  refreshInFlight ??= fetch(REFRESH_ROUTE, { method: "POST", credentials: "include" })
+    .then((res) => res.ok)
+    .catch(() => false)
+    .finally(() => {
+      refreshInFlight = null;
+    });
+  return refreshInFlight;
+}
+
 const baseURL = `${getBaseUrl().replace(/\/$/, "")}${API_PREFIX}`;
 
 export const apiAxios = Axios.create({
@@ -143,16 +159,8 @@ apiAxios.interceptors.response.use(
       return Promise.reject(new Error("Session expired"));
     }
 
-    try {
-      const refreshRes = await fetch(REFRESH_ROUTE, {
-        method: "POST",
-        credentials: "include",
-      });
-      if (refreshRes.ok) {
-        return apiAxios.request(originalRequest);
-      }
-    } catch {
-      // refresh failed
+    if (await refreshSession()) {
+      return apiAxios.request(originalRequest);
     }
 
     await clearTokens();

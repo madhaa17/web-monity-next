@@ -4,6 +4,7 @@ import {
   BarChart3,
   HandCoins,
   LayoutDashboard,
+  Settings,
   Target,
   TrendingDown,
   TrendingUp,
@@ -25,4 +26,5 @@ export const dashboardNavItems: DashboardNavItem[] = [
   { href: "/dashboard/debts", label: "Debts", icon: HandCoins },
   { href: "/dashboard/receivables", label: "Receivables", icon: ArrowRightLeft },
   { href: "/dashboard/insights", label: "Insights", icon: BarChart3 },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];

@@ -3,12 +3,14 @@
 import type { PriceChartPoint } from "@/lib/api/types";
 import { formatUnitPrice } from "@/lib/format";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import {
   CartesianGrid,
   Line,
   LineChart,
+  ReferenceLine,
   XAxis,
   YAxis,
 } from "recharts";
@@ -67,6 +69,13 @@ function formatPriceTick(v: number): string {
   return new Intl.NumberFormat("id-ID", { maximumFractionDigits }).format(v);
 }
 
+/** Signed percentage with Indonesian separators (+1,31%, -0,5%). */
+function formatChangePercent(v: number): string {
+  return (
+    new Intl.NumberFormat("id-ID", { signDisplay: "exceptZero", maximumFractionDigits: 2 }).format(v) + "%"
+  );
+}
+
 export interface PriceChartRangeOption {
   value: string;
   label: string;
@@ -76,8 +85,10 @@ export interface PriceChartProps {
   data: PriceChartPoint[];
   currency?: string;
   symbol?: string;
-  /** Selisih hari data terakhir (mis. 2 = harga terakhir 2 hari yang lalu). Ditampilkan sebagai keterangan. */
-  dataDelayDays?: number;
+  /** data is the last chart fetched because the price source was unreachable. */
+  stale?: boolean;
+  /** Previous session's close: drawn as a dashed baseline and used for the change instead of the first point. */
+  previousClose?: number;
   /** Opsi untuk filter range (mis. 1W, 1M). Ditampilkan sebagai Select di kanan header. */
   rangeOptions?: PriceChartRangeOption[];
   selectedRange?: string;
@@ -88,7 +99,8 @@ export function PriceChart({
   data,
   currency = DEFAULT_CURRENCY,
   symbol,
-  dataDelayDays = 2,
+  stale = false,
+  previousClose,
   rangeOptions,
   selectedRange,
   onRangeChange,
@@ -108,13 +120,16 @@ export function PriceChart({
   const lastTime = series.length > 0 ? new Date(series[series.length - 1].time).getTime() : NaN;
   const intraday = lastTime - firstTime < INTRADAY_SPAN_MS;
 
-  const firstPrice = series[0]?.price;
+  // The change is measured from the previous close when given (1D), else from the range's first point.
+  const basePrice = previousClose ?? series[0]?.price;
   const lastPrice = series[series.length - 1]?.price;
   const priceUp =
-    firstPrice != null &&
+    basePrice != null &&
     lastPrice != null &&
-    lastPrice >= firstPrice;
+    lastPrice >= basePrice;
   const lineStroke = priceUp ? "hsl(142, 76%, 36%)" : "hsl(0, 84%, 60%)";
+  const change = basePrice != null && lastPrice != null ? lastPrice - basePrice : null;
+  const changePercent = change != null && basePrice ? (change / basePrice) * 100 : null;
 
   const title = symbol ? `Price chart — ${symbol}` : "Price chart";
   const showRangeSelect = rangeOptions && rangeOptions.length > 0 && selectedRange != null && onRangeChange;
@@ -124,9 +139,27 @@ export function PriceChart({
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 space-y-0 pb-2">
         <div className="space-y-0.5">
           <CardTitle className="text-base">{title}</CardTitle>
-          {dataDelayDays > 0 && series.length > 0 && (
+          {lastPrice != null && (
+            <p className="flex flex-wrap items-baseline gap-x-2 text-sm">
+              <span className="font-semibold tabular-nums">{formatUnitPrice(lastPrice, currency)}</span>
+              {change != null && changePercent != null && (
+                <span
+                  className={
+                    priceUp
+                      ? "tabular-nums text-green-600 dark:text-green-500"
+                      : "tabular-nums text-red-600 dark:text-red-500"
+                  }
+                >
+                  {change > 0 ? "+" : change < 0 ? "−" : ""}
+                  {formatUnitPrice(Math.abs(change), currency)} ({formatChangePercent(changePercent)})
+                </span>
+              )}
+            </p>
+          )}
+          {series.length > 0 && (
             <p className="text-xs text-muted-foreground">
-              Harga terakhir hingga {dataDelayDays} hari yang lalu.
+              Data per {formatTooltipTime(series[series.length - 1].time, true)}
+              {previousClose != null && ` · vs penutupan sebelumnya ${formatUnitPrice(previousClose, currency)}`}
             </p>
           )}
         </div>
@@ -146,6 +179,15 @@ export function PriceChart({
         )}
       </CardHeader>
       <CardContent className="p-4 sm:p-6">
+        {stale && series.length > 0 && (
+          <p
+            role="status"
+            className="mb-3 flex items-start gap-2 rounded-md bg-amber-500/10 px-3 py-2 text-xs text-amber-800 dark:text-amber-300"
+          >
+            <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
+            Sumber harga sedang tidak bisa diakses. Menampilkan grafik terakhir yang tersimpan.
+          </p>
+        )}
         {series.length === 0 ? (
           <p className="flex min-h-[180px] sm:min-h-[240px] items-center justify-center text-sm text-muted-foreground">
             No chart data yet.
@@ -180,6 +222,15 @@ export function PriceChart({
                 tickLine={false}
                 width={yAxisWidth}
               />
+              {previousClose != null && (
+                <ReferenceLine
+                  y={previousClose}
+                  stroke="var(--muted-foreground)"
+                  strokeDasharray="4 4"
+                  // Keep the baseline visible when the day's prices stay above or below it.
+                  ifOverflow="extendDomain"
+                />
+              )}
               <ChartTooltip
                 content={
                   <ChartTooltipContent

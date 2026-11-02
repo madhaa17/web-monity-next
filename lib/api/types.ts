@@ -165,7 +165,7 @@ export interface ReceivablePayment {
 export interface PortfolioSummary {
   totalValue?: number;
   currency?: string;
-  assets?: Array<{ uuid: string; name?: string; value?: number; [key: string]: unknown }>;
+  assets?: Array<{ uuid: string; name?: string; value?: number; currency?: string; [key: string]: unknown }>;
   [key: string]: unknown;
 }
 
@@ -233,6 +233,11 @@ export interface RegisterBody {
 
 export interface RefreshBody {
   refresh_token: string;
+}
+
+export interface ChangePasswordBody {
+  current_password: string;
+  new_password: string;
 }
 
 /** Body for creating or updating an income/expense; source is required for incomes only. */
@@ -358,6 +363,10 @@ export interface PriceChartPoint {
 export interface PriceChartSeries {
   currency?: string;
   points: PriceChartPoint[];
+  /** Close of the previous session, the baseline of an intraday (1D) stock chart. */
+  previousClose?: number;
+  /** The price source was unreachable; points are the last chart fetched. */
+  stale?: boolean;
 }
 
 export interface CreateAssetBody {

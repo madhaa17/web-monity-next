@@ -14,7 +14,7 @@ export interface CryptoChartParams {
   days?: number;
 }
 
-/** Stock chart: range (1d, 5d, 1mo, 3mo, 6mo, 1y, …) + interval (1d, 1wk, 1mo). Default range=1mo, interval=1d. Hindari range panjang (2y, 5y, 10y, max) dengan interval=1d. */
+/** Stock chart: range (1d, 5d, 1mo, 3mo, 6mo, 1y, …) + interval (5m, 15m, 30m, 1h hanya untuk 1d/5d; 1d, 1wk, 1mo). Default range=1mo, interval=1d. Hindari range panjang (2y, 5y, 10y, max) dengan interval=1d. */
 export interface StockChartParams {
   currency?: string;
   range?: string;
@@ -99,13 +99,16 @@ export async function getStockChart(
   return toChartSeries(res.data);
 }
 
-/** Read points and currency from a chart response ({ symbol, currency, data: [] } or a bare array). */
+/** Read points, currency, previous close and staleness from a chart response ({ symbol, currency, previousClose, stale, data: [] } or a bare array). */
 function toChartSeries(raw: unknown): PriceChartSeries {
   const currency =
     raw && typeof raw === "object" && "currency" in raw && typeof raw.currency === "string" && raw.currency
       ? raw.currency.toUpperCase()
       : undefined;
-  return { currency, points: normalizeChartData(extractChartArray(raw)) };
+  const stale = !!raw && typeof raw === "object" && "stale" in raw && raw.stale === true;
+  const previousClose =
+    raw && typeof raw === "object" && "previousClose" in raw ? toNumber(raw.previousClose) || undefined : undefined;
+  return { currency, previousClose, stale, points: normalizeChartData(extractChartArray(raw)) };
 }
 
 /** Extract chart series from API: either data is array or data.data is array (e.g. { symbol, currency, data: [] }). */

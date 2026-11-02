@@ -38,12 +38,15 @@ export default function AssetDetailPage() {
     showChart,
     chartData,
     chartCurrency,
+    chartStale,
+    chartPreviousClose,
     chartLoading,
     chartError,
     quantity,
     totalCost,
     currentValue,
     currentPrice,
+    valueCurrency,
     lotSize,
     priceSource,
     priceAsOf,
@@ -116,6 +119,7 @@ export default function AssetDetailPage() {
       totalCost={totalCost}
       currentValue={currentValue}
       currentPrice={currentPrice}
+      valueCurrency={valueCurrency}
       lotSize={lotSize}
       priceSource={priceSource}
       priceAsOf={priceAsOf}
@@ -124,6 +128,8 @@ export default function AssetDetailPage() {
       profitLoss={profitLoss}
       chartData={chartData}
       chartCurrency={chartCurrency}
+      chartStale={chartStale}
+      chartPreviousClose={chartPreviousClose}
       chartLoading={chartLoading}
       chartError={chartError}
       showChart={showChart}

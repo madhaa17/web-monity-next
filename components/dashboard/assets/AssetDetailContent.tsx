@@ -27,7 +27,16 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 /** Explains a price that is not a live market price, or returns null for a live one. */
-function priceNote(source: string | undefined, asOf: string | undefined, stale: boolean): string | null {
+function priceNote(
+  source: string | undefined,
+  asOf: string | undefined,
+  stale: boolean,
+  valueCurrency: string,
+  currency: string
+): string | null {
+  if (valueCurrency !== currency) {
+    return `Kurs ${valueCurrency} ke ${currency} sedang tidak tersedia, jadi harga ditampilkan dalam ${valueCurrency}.`;
+  }
   if (source === "fallback") {
     return "Harga pasar sedang tidak tersedia, jadi nilai memakai harga beli.";
   }
@@ -55,6 +64,8 @@ export interface AssetDetailContentProps {
   currentValue: number | undefined;
   /** Market price per unit (per share for stocks), from the API. */
   currentPrice: number | undefined;
+  /** Currency of currentValue and currentPrice (currency unless no exchange rate was available). */
+  valueCurrency: string;
   /** Units per lot when quantity is counted in lots (IDX stocks). */
   lotSize: number | undefined;
   priceSource: string | undefined;
@@ -65,6 +76,10 @@ export interface AssetDetailContentProps {
   chartData: PriceChartPoint[] | undefined;
   /** Currency of chartData's prices (a US stock's chart is in USD). */
   chartCurrency: string;
+  /** chartData is the last chart fetched because the price source was unreachable. */
+  chartStale: boolean;
+  /** Previous session's close, the baseline of a 1D stock chart. */
+  chartPreviousClose: number | undefined;
   chartLoading: boolean;
   chartError: boolean;
   showChart: boolean;
@@ -83,6 +98,7 @@ export function AssetDetailContent({
   totalCost,
   currentValue,
   currentPrice,
+  valueCurrency,
   lotSize,
   priceSource,
   priceAsOf,
@@ -91,6 +107,8 @@ export function AssetDetailContent({
   profitLoss,
   chartData,
   chartCurrency,
+  chartStale,
+  chartPreviousClose,
   chartLoading,
   chartError,
   isCrypto,
@@ -163,7 +181,7 @@ export function AssetDetailContent({
             <div className="flex justify-between">
               <span className="text-muted-foreground">Current value</span>
               <span className="tabular-nums">
-                {formatCurrency(currentValue, currency)}
+                {formatCurrency(currentValue, valueCurrency)}
               </span>
             </div>
           ) : null}
@@ -198,17 +216,17 @@ export function AssetDetailContent({
                 Last price{lotSize && lotSize > 1 ? " / lembar" : ""}
               </span>
               <span className="tabular-nums font-medium">
-                {formatUnitPrice(currentPrice, currency)}
+                {formatUnitPrice(currentPrice, valueCurrency)}
               </span>
             </div>
           ) : null}
-          {(isCrypto || isStock) && priceNote(priceSource, priceAsOf, priceStale) ? (
+          {(isCrypto || isStock) && priceNote(priceSource, priceAsOf, priceStale, valueCurrency, currency) ? (
             <p
               role="status"
               className="flex items-start gap-2 rounded-md bg-amber-500/10 px-3 py-2 text-xs text-amber-800 dark:text-amber-300"
             >
               <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
-              {priceNote(priceSource, priceAsOf, priceStale)}
+              {priceNote(priceSource, priceAsOf, priceStale, valueCurrency, currency)}
             </p>
           ) : null}
         </CardContent>
@@ -245,7 +263,8 @@ export function AssetDetailContent({
               data={chartData}
               currency={chartCurrency}
               symbol={symbol}
-              dataDelayDays={isStock ? 2 : 0}
+              stale={chartStale}
+              previousClose={chartPreviousClose}
               rangeOptions={rangeOptions}
               selectedRange={selectedRange}
               onRangeChange={onRangeChange}

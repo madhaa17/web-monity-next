@@ -48,6 +48,8 @@ function buildValueByUuid(
   const list = portfolio?.assets;
   if (!Array.isArray(list)) return map;
   for (const a of list) {
+    // A value in another currency (exchange rate unavailable) cannot be added to the totals.
+    if (portfolio?.currency && a.currency && a.currency !== portfolio.currency) continue;
     map.set(a.uuid, toNumber(a.value));
   }
   return map;

@@ -13,19 +13,20 @@ const DEFAULT_CURRENCY = "IDR";
 /** Crypto chart: backend whitelist days = 1, 7, 14, 30, 90, 180, 365 (default 7). Jangan kirim nilai di luar ini. */
 export const CRYPTO_DAYS_WHITELIST: readonly number[] = [1, 7, 14, 30, 90, 180, 365];
 
-/** Stock chart: range + interval. Data harian sampai 1Y (~250 titik); range lebih panjang pakai 1wk atau 1mo. */
-export type ChartRangePresetKey = "1W" | "1M" | "3M" | "6M" | "1Y";
+/** Stock chart: range + interval. 1D intraday per 5 menit; data harian sampai 1Y (~250 titik); range lebih panjang pakai 1wk atau 1mo. */
+export type ChartRangePresetKey = "1D" | "1W" | "1M" | "3M" | "6M" | "1Y";
 
 export const CHART_RANGE_PRESETS: {
   key: ChartRangePresetKey;
   label: string;
   /** Days untuk crypto (harus dari CRYPTO_DAYS_WHITELIST). */
   cryptoDays: number;
-  /** Stock: range (5d, 1mo, 3mo, 6mo, 1y). */
+  /** Stock: range (1d, 5d, 1mo, 3mo, 6mo, 1y). */
   range: string;
-  /** Stock: interval (1d, 1wk, 1mo). Range > 1Y wajib 1wk atau 1mo. */
+  /** Stock: interval (5m untuk 1d; 1d, 1wk, 1mo). Range > 1Y wajib 1wk atau 1mo. */
   interval: string;
 }[] = [
+  { key: "1D", label: "1D", cryptoDays: 1, range: "1d", interval: "5m" },
   { key: "1W", label: "1W", cryptoDays: 7, range: "5d", interval: "1d" },
   { key: "1M", label: "1M", cryptoDays: 30, range: "1mo", interval: "1d" },
   { key: "3M", label: "3M", cryptoDays: 90, range: "3mo", interval: "1d" },
@@ -33,7 +34,7 @@ export const CHART_RANGE_PRESETS: {
   { key: "1Y", label: "1Y", cryptoDays: 365, range: "1y", interval: "1d" },
 ];
 
-export const DEFAULT_CHART_RANGE: ChartRangePresetKey = "1M";
+export const DEFAULT_CHART_RANGE: ChartRangePresetKey = "1D";
 
 export interface UseAssetDetailDataResult {
   asset: Asset | undefined;
@@ -48,6 +49,10 @@ export interface UseAssetDetailDataResult {
   chartData: PriceChartPoint[] | undefined;
   /** Currency of chartData's prices; may differ from currency (e.g. USD for a US stock). */
   chartCurrency: string;
+  /** chartData is the last chart fetched because the price source was unreachable. */
+  chartStale: boolean;
+  /** Previous session's close, the baseline of a 1D stock chart. */
+  chartPreviousClose: number | undefined;
   chartLoading: boolean;
   chartError: boolean;
   quantity: number;
@@ -55,6 +60,8 @@ export interface UseAssetDetailDataResult {
   currentValue: number | undefined;
   /** Market price per unit (per share, not per lot). */
   currentPrice: number | undefined;
+  /** Currency of currentValue and currentPrice; differs from currency when no exchange rate was available. */
+  valueCurrency: string;
   /** Units per lot when quantity is counted in lots (IDX stocks). */
   lotSize: number | undefined;
   priceSource: string | undefined;
@@ -122,6 +129,8 @@ export function useAssetDetailData(
       : undefined;
   const chartData = chartSeries?.points;
   const chartCurrency = chartSeries?.currency ?? currency;
+  const chartStale = chartSeries?.stale ?? false;
+  const chartPreviousClose = chartSeries?.previousClose;
   const chartLoading =
     showChart && (cryptoChartQuery.isLoading || stockChartQuery.isLoading);
   const chartError =
@@ -133,8 +142,9 @@ export function useAssetDetailData(
     assetValueData?.value != null ? toNumber(assetValueData.value) : undefined;
   const currentPrice =
     assetValueData?.currentPrice != null ? toNumber(assetValueData.currentPrice) : undefined;
+  const valueCurrency = assetValueData?.currency || currency;
   const showProfitLoss =
-    (isCrypto || isStock) && totalCost > 0 && currentValue != null;
+    (isCrypto || isStock) && totalCost > 0 && currentValue != null && valueCurrency === currency;
   const profitLoss = showProfitLoss ? (currentValue ?? 0) - totalCost : 0;
 
   return {
@@ -149,12 +159,15 @@ export function useAssetDetailData(
     showChart,
     chartData,
     chartCurrency,
+    chartStale,
+    chartPreviousClose,
     chartLoading,
     chartError,
     quantity,
     totalCost,
     currentValue,
     currentPrice,
+    valueCurrency,
     lotSize: assetValueData?.lotSize,
     priceSource: assetValueData?.priceSource,
     priceAsOf: assetValueData?.priceAsOf,

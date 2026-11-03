@@ -5,7 +5,6 @@ import {
   BarChart3,
   Check,
   ChevronDown,
-  Coins,
   HandCoins,
   LineChart,
   Moon,
@@ -20,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { ProductPreview } from "@/components/landing/ProductPreview";
+import { Logo, LogoMark } from "@/components/brand/Logo";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -181,12 +181,8 @@ export default function HomePage() {
     <div className="bg-background flex min-h-screen flex-col">
       <header className="bg-background/80 sticky top-0 z-50 w-full border-b backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4 md:px-6">
-          <Link
-            href="/"
-            className="text-primary dark:text-primary-foreground flex items-center gap-2 text-xl font-semibold sm:text-2xl"
-          >
-            <Coins className="size-6 shrink-0" />
-            <span>MoneyTor</span>
+          <Link href="/" aria-label="MoneyTor home" className="text-xl sm:text-2xl">
+            <Logo markClassName="size-7 sm:size-8" />
           </Link>
           <nav className="hidden items-center gap-6 text-sm lg:flex" aria-label="Sections">
             {NAV.map((item) => (
@@ -396,7 +392,7 @@ export default function HomePage() {
       <footer className="border-t py-8">
         <div className="container mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 md:flex-row md:px-6">
           <div className="text-muted-foreground flex items-center gap-2 text-sm">
-            <Coins className="text-primary size-4 dark:text-blue-400" />
+            <LogoMark className="size-5" />
             <span>© {new Date().getFullYear()} MoneyTor</span>
           </div>
           <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm" aria-label="Footer">

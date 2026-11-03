@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { Logo } from "@/components/brand/Logo";
 
 export default function AuthLayout({
   children,
@@ -10,6 +12,9 @@ export default function AuthLayout({
       <div className="absolute right-4 top-4">
         <ThemeToggle />
       </div>
+      <Link href="/" aria-label="MoneyTor home" className="mb-6 text-2xl">
+        <Logo markClassName="size-9" />
+      </Link>
       <div className="w-full max-w-sm rounded-lg border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
         {children}
       </div>

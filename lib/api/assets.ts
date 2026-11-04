@@ -8,9 +8,21 @@ function extractListItems<T>(data: unknown): T[] {
   return [];
 }
 
+// Backend max page size; the list endpoint defaults to 20, which would silently drop older assets.
+const ASSETS_PAGE_LIMIT = 100;
+
+/** All of the user's assets, fetched page by page (callers rely on the full set, e.g. finding CASH assets). */
 export async function listAssets(): Promise<Asset[]> {
-  const res = await apiClient<ApiResponse<ListResponse<Asset>>>("/assets");
-  return extractListItems<Asset>(res.data);
+  const all: Asset[] = [];
+  for (let page = 1; ; page++) {
+    const res = await apiClient<ApiResponse<ListResponse<Asset>>>(
+      `/assets?page=${page}&limit=${ASSETS_PAGE_LIMIT}`,
+    );
+    const items = extractListItems<Asset>(res.data);
+    all.push(...items);
+    const totalPages = res.data?.meta?.totalPages ?? 1;
+    if (page >= totalPages || items.length < ASSETS_PAGE_LIMIT) return all;
+  }
 }
 
 export async function getAsset(uuid: string): Promise<Asset> {

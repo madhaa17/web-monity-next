@@ -18,7 +18,6 @@ export interface LoginFormProps {
   handleSubmit: UseFormHandleSubmit<LoginFormValues>;
   errors: FieldErrors<LoginFormValues>;
   isSubmitting: boolean;
-  apiError: string | null;
   onSubmit: (data: LoginFormValues) => Promise<void>;
 }
 
@@ -27,7 +26,6 @@ export function LoginForm({
   handleSubmit,
   errors,
   isSubmitting,
-  apiError,
   onSubmit,
 }: LoginFormProps) {
   return (
@@ -61,9 +59,6 @@ export function LoginForm({
             <FieldError errors={errors.password ? [errors.password] : undefined} />
           </FieldContent>
         </Field>
-        <FieldError
-          errors={apiError ? [{ message: apiError }] : undefined}
-        />
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Signing in…" : "Sign in"}
         </Button>

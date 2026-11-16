@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { rejectCrossSite } from "@/lib/auth/csrf";
 import { MoneyTor_TOKEN, MoneyTor_REFRESH_TOKEN } from "@/lib/auth/cookies";
 import { getBaseUrl } from "@/lib/api/client";
 
@@ -17,7 +18,10 @@ function cookieOptions(maxAge: number, httpOnly: boolean) {
   };
 }
 
-export async function POST() {
+export async function POST(request: Request) {
+  const blocked = rejectCrossSite(request);
+  if (blocked) return blocked;
+
   const cookieStore = await cookies();
   const refreshToken = cookieStore.get(MoneyTor_REFRESH_TOKEN)?.value;
 

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { rejectCrossSite, requireJson } from "@/lib/auth/csrf";
 import type { ApiResponse } from "@/lib/api/types";
 import type { User } from "@/lib/api/types";
 import { MoneyTor_TOKEN, MoneyTor_REFRESH_TOKEN } from "@/lib/auth/cookies";
@@ -19,6 +20,9 @@ function cookieOptions(maxAge: number, httpOnly: boolean) {
 }
 
 export async function POST(request: Request) {
+  const blocked = rejectCrossSite(request) ?? requireJson(request);
+  if (blocked) return blocked;
+
   let body: { token?: string; refreshToken?: string };
   try {
     body = await request.json();

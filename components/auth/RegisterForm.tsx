@@ -33,7 +33,7 @@ export function RegisterForm({
   return (
     <>
       <h1 className="mb-4 text-xl font-semibold">Create account</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
+      <form method="post" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
         <Field>
           <FieldLabel htmlFor="name">Name</FieldLabel>
           <FieldContent>

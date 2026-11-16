@@ -38,7 +38,7 @@ export function ChangePasswordForm({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
+        <form method="post" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
           <Field>
             <FieldLabel htmlFor="currentPassword">Current password</FieldLabel>
             <FieldContent>

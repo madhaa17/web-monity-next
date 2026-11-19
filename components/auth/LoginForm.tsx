@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
+import { DEMO_ACCOUNT } from "@/lib/demo";
 
 export interface LoginFormProps {
   register: UseFormRegister<LoginFormValues>;
@@ -19,6 +20,7 @@ export interface LoginFormProps {
   errors: FieldErrors<LoginFormValues>;
   isSubmitting: boolean;
   onSubmit: (data: LoginFormValues) => Promise<void>;
+  fillDemo: () => void;
 }
 
 export function LoginForm({
@@ -27,10 +29,30 @@ export function LoginForm({
   errors,
   isSubmitting,
   onSubmit,
+  fillDemo,
 }: LoginFormProps) {
   return (
     <>
       <h1 className="mb-4 text-xl font-semibold">Log in</h1>
+      <div className="mb-4 rounded-md border border-dashed border-zinc-300 p-3 text-sm dark:border-zinc-700">
+        <p className="font-medium">Demo account</p>
+        <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-2 text-zinc-600 dark:text-zinc-400">
+          <dt>Email</dt>
+          <dd className="font-mono break-all select-all">{DEMO_ACCOUNT.email}</dd>
+          <dt>Password</dt>
+          <dd className="font-mono select-all">{DEMO_ACCOUNT.password}</dd>
+        </dl>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="mt-2 w-full"
+          onClick={fillDemo}
+          disabled={isSubmitting}
+        >
+          Use demo account
+        </Button>
+      </div>
       <form method="post" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>

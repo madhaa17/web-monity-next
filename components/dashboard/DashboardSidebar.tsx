@@ -17,6 +17,8 @@ import {
 import type { DashboardNavItem } from "@/lib/dashboard-nav";
 import { dashboardNavItems } from "@/lib/dashboard-nav";
 import { Logo } from "@/components/brand/Logo";
+import { useAuth } from "@/hooks/useAuth";
+import { isDemoEmail } from "@/lib/demo";
 
 export interface DashboardSidebarProps {
   pathname: string;
@@ -29,6 +31,10 @@ export function DashboardSidebar({
   isLoggingOut,
   onLogout,
 }: DashboardSidebarProps) {
+  const { user } = useAuth();
+  const isDemo = isDemoEmail(user?.email);
+  const navItems = dashboardNavItems.filter((item) => !(isDemo && item.hiddenForDemo));
+
   return (
     <Sidebar side="left" collapsible="offcanvas">
       <SidebarHeader className="flex h-14 shrink-0 items-center justify-center border-b border-sidebar-border px-2">
@@ -40,7 +46,7 @@ export function DashboardSidebar({
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {dashboardNavItems.map((item: DashboardNavItem) => {
+              {navItems.map((item: DashboardNavItem) => {
                 const Icon = item.icon;
                 return (
                   <SidebarMenuItem key={item.href}>

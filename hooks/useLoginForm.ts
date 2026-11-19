@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { login } from "@/lib/api/auth";
 import type { LoginFormValues } from "@/lib/validations/auth";
 import { loginSchema } from "@/lib/validations/auth";
+import { DEMO_ACCOUNT } from "@/lib/demo";
 
 export function useLoginForm() {
   const router = useRouter();
@@ -15,7 +16,7 @@ export function useLoginForm() {
     resolver: zodResolver(loginSchema),
   });
 
-  const { register, handleSubmit, formState } = form;
+  const { register, handleSubmit, formState, setValue } = form;
   const { errors, isSubmitting } = formState;
 
   async function onSubmit(data: LoginFormValues) {
@@ -28,11 +29,17 @@ export function useLoginForm() {
     }
   }
 
+  function fillDemo() {
+    setValue("email", DEMO_ACCOUNT.email, { shouldValidate: true });
+    setValue("password", DEMO_ACCOUNT.password, { shouldValidate: true });
+  }
+
   return {
     register,
     handleSubmit,
     errors,
     isSubmitting,
     onSubmit,
+    fillDemo,
   };
 }

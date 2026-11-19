@@ -15,6 +15,8 @@ export interface DashboardNavItem {
   href: string;
   label: string;
   icon: LucideIcon;
+  /** Hidden from the shared demo account. */
+  hiddenForDemo?: boolean;
 }
 
 export const dashboardNavItems: DashboardNavItem[] = [
@@ -26,5 +28,5 @@ export const dashboardNavItems: DashboardNavItem[] = [
   { href: "/dashboard/debts", label: "Debts", icon: HandCoins },
   { href: "/dashboard/receivables", label: "Receivables", icon: ArrowRightLeft },
   { href: "/dashboard/insights", label: "Insights", icon: BarChart3 },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings, hiddenForDemo: true },
 ];

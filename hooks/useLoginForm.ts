@@ -20,22 +20,9 @@ export function useLoginForm() {
 
   async function onSubmit(data: LoginFormValues) {
     try {
-      const res = await login(data);
-      if (!res.token || !res.refreshToken) {
-        toast.error("Invalid response from server");
-        return;
-      }
-      const sessionRes = await fetch("/api/auth/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ token: res.token, refreshToken: res.refreshToken }),
-      });
-      if (sessionRes.ok) {
-        router.push("/dashboard");
-      } else {
-        toast.error("Failed to set session");
-      }
+      // The backend sets the session cookies on this response.
+      await login(data);
+      router.push("/dashboard");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Login failed");
     }

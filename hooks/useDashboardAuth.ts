@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { clearTokens } from "@/lib/api/client";
+import { logout } from "@/lib/api/auth";
 
 /**
  * Handles dashboard auth: logout action. Route protection is done by middleware.
@@ -19,7 +19,7 @@ export function useDashboardAuth() {
   async function handleLogout() {
     setIsLoggingOut(true);
     try {
-      await clearTokens();
+      await logout();
       router.replace("/login");
     } finally {
       setIsLoggingOut(false);

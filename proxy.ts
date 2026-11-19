@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { MoneyTor_TOKEN } from "@/lib/auth/cookies";
+import { getApiUrl, internalHeaders, INTERNAL_TOKEN_HEADER } from "@/lib/api/server-config";
 
+const API_PREFIX = "/api/v1";
 const PROTECTED_PREFIX = "/dashboard";
 const PUBLIC_PATHS = ["/", "/login", "/register"];
 const ASSET_DETAIL_PATH = /^\/dashboard\/assets\/([^/]+)$/;
@@ -20,7 +22,29 @@ function isAssetDetailPath(pathname: string): string | null {
   return m?.[1] ?? null;
 }
 
+/**
+ * Forwards /api/v1/* to the backend with the shared secret attached, so the backend only answers
+ * this server. The browser keeps talking same-origin; the backend's Set-Cookie headers come back
+ * through this rewrite and land on this domain.
+ */
+function proxyApi(request: NextRequest): NextResponse {
+  const { pathname, search } = request.nextUrl;
+  const headers = new Headers(request.headers);
+  // Never trust a token sent by the browser; only this server may set it.
+  headers.delete(INTERNAL_TOKEN_HEADER);
+  for (const [name, value] of Object.entries(internalHeaders())) {
+    headers.set(name, value);
+  }
+  return NextResponse.rewrite(new URL(`${getApiUrl()}${pathname}${search}`), {
+    request: { headers },
+  });
+}
+
 export async function proxy(request: NextRequest) {
+  if (request.nextUrl.pathname.startsWith(`${API_PREFIX}/`)) {
+    return proxyApi(request);
+  }
+
   const token = request.cookies.get(MoneyTor_TOKEN)?.value;
   const hasToken = !!token?.trim();
   const { pathname } = request.nextUrl;
@@ -31,10 +55,9 @@ export async function proxy(request: NextRequest) {
     }
     const uuid = isAssetDetailPath(pathname);
     if (uuid) {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
-      const url = `${baseUrl.replace(/\/$/, "")}/api/v1/assets/${uuid}`;
+      const url = `${getApiUrl()}${API_PREFIX}/assets/${encodeURIComponent(uuid)}`;
       const res = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}`, ...internalHeaders() },
       });
       if (!res.ok) {
         return NextResponse.redirect(new URL("/404", request.url));
@@ -56,5 +79,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard", "/dashboard/:path*", "/", "/login", "/register"],
+  matcher: ["/api/v1/:path*", "/dashboard", "/dashboard/:path*", "/", "/login", "/register"],
 };

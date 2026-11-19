@@ -44,13 +44,15 @@ A personal finance web app for tracking **assets**, **expenses**, **incomes**, a
 
 2. **Environment**
 
-   Create `.env.local` and set the API base URL:
+   Create `.env.local`:
 
    ```env
-   NEXT_PUBLIC_API_URL=https://api-assetmonitor.my.id
+   API_URL=http://localhost:8080
+   INTERNAL_API_TOKEN=
    ```
 
-   For local backend use `http://localhost:8080` (or your backend URL).
+   Both are server-only (read by `proxy.ts`); never prefix them with `NEXT_PUBLIC_`. For local and
+   production setup of web + backend see [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
 
 3. **Run the dev server**
 

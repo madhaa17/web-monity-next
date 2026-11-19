@@ -18,9 +18,8 @@ export interface ListResponse<T> {
 }
 
 /** Auth: login/register return token + refreshToken (camelCase per OpenAPI) */
+/** Body of login/register/refresh/password responses; the tokens are only in HttpOnly cookies. */
 export interface AuthResponse {
-  token: string;
-  refreshToken: string;
   user?: User;
 }
 
@@ -181,10 +180,6 @@ export interface RegisterBody {
   email: string;
   password: string;
   name: string;
-}
-
-export interface RefreshBody {
-  refresh_token: string;
 }
 
 export interface ChangePasswordBody {

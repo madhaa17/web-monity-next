@@ -1,95 +1,34 @@
 /**
  * API client for MoneyTor backend.
- * Token is stored in cookies: access token readable by client (for Authorization header),
- * refresh token httpOnly; set/clear/refresh via /api/auth/session, /api/auth/logout, /api/auth/refresh.
+ * Requests go to same-origin /api/v1, which proxy.ts forwards to the backend with the internal token.
+ * Auth lives entirely in HttpOnly cookies that the backend sets and reads; this code never sees a token.
  */
 
 import Axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
-import { MoneyTor_TOKEN } from "@/lib/auth/cookies";
 
 const API_PREFIX = "/api/v1";
 
-const NO_AUTH_PATHS = ["/auth/login", "/auth/register", "/auth/refresh"];
-
-function pathNeedsAuth(path: string): boolean {
-  const normalized = path.startsWith("/") ? path : `/${path}`;
-  return !NO_AUTH_PATHS.some((p) => normalized === p || normalized.startsWith(`${p}?`));
-}
-
-export function getBaseUrl(): string {
-  if (typeof window !== "undefined") {
-    return process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
-  }
-  return process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
-}
-
-function validToken(value: string | null): string | null {
-  if (value == null || value === "" || value === "undefined") return null;
-  return value;
-}
-
-function getCookie(name: string): string | null {
-  if (typeof document === "undefined") return null;
-  const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`));
-  return match ? decodeURIComponent(match[1]) : null;
-}
-
-/** Returns access token from cookie in browser; null on server or if invalid. */
-export function getToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return validToken(getCookie(MoneyTor_TOKEN));
-}
-
-/** Client cannot read httpOnly refresh token; returns null. Used only server-side in refresh route. */
-export function getRefreshToken(): string | null {
-  return null;
-}
-
-/** Sets auth cookies via Next.js session route. Call after login/register. */
-export async function setTokens(token: string, refreshToken: string): Promise<void> {
-  if (typeof window === "undefined") return;
-  if (!token || !refreshToken) return;
-  await fetch("/api/auth/session", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ token, refreshToken }),
-  });
-}
-
-/** Clears auth cookies via Next.js logout route. Does not redirect. */
-export async function clearTokens(): Promise<void> {
-  if (typeof window === "undefined") return;
-  await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-}
-
 function redirectToLogin(): void {
-  if (typeof window !== "undefined") {
+  if (typeof window !== "undefined" && window.location.pathname !== "/login") {
     window.location.href = "/login";
   }
 }
 
-function isRefreshRequest(config: { url?: string; baseURL?: string }): boolean {
+/** Requests whose 401 means "wrong credentials" or "session over", never "refresh and retry". */
+function isAuthEndpoint(config: { url?: string }): boolean {
   const url = config.url ?? "";
-  return url.includes("auth/refresh");
+  return ["auth/login", "auth/register", "auth/refresh", "auth/logout"].some((p) => url.includes(p));
 }
-
-function isAuthLoginOrRegisterRequest(config: { url?: string }): boolean {
-  const url = config.url ?? "";
-  return url.includes("auth/login") || url.includes("auth/register");
-}
-
-const REFRESH_ROUTE = "/api/auth/refresh";
 
 let refreshInFlight: Promise<boolean> | null = null;
 
 /**
- * Refreshes the session once for all requests that hit 401 together. Each refresh rotates the
- * refresh token, so parallel refreshes would race to overwrite the cookie.
+ * Asks the backend to rotate the token cookies, once for all requests that hit 401 together. Each
+ * refresh rotates the refresh token, so parallel refreshes would race to overwrite the cookie.
  */
 function refreshSession(): Promise<boolean> {
-  refreshInFlight ??= fetch(REFRESH_ROUTE, { method: "POST", credentials: "include" })
-    .then((res) => res.ok)
+  refreshInFlight ??= Axios.post(`${API_PREFIX}/auth/refresh`, undefined, { withCredentials: true })
+    .then(() => true)
     .catch(() => false)
     .finally(() => {
       refreshInFlight = null;
@@ -97,24 +36,21 @@ function refreshSession(): Promise<boolean> {
   return refreshInFlight;
 }
 
-const baseURL = `${getBaseUrl().replace(/\/$/, "")}${API_PREFIX}`;
+/** Revokes the session on the backend, which also clears the auth cookies. Does not redirect. */
+export async function logoutSession(): Promise<void> {
+  try {
+    await Axios.post(`${API_PREFIX}/auth/logout`, undefined, { withCredentials: true });
+  } catch {
+    // Backend unreachable: nothing else the browser can do, the cookies are HttpOnly.
+  }
+}
 
 export const apiAxios = Axios.create({
-  baseURL,
+  baseURL: API_PREFIX,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
-});
-
-apiAxios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const path = config.url ?? "";
-  if (pathNeedsAuth(path)) {
-    const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-  }
-  return config;
 });
 
 /** Backend error payload: { success: false, message: "...", errors: { message: "..." } } or { error: "..." } */
@@ -145,25 +81,20 @@ apiAxios.interceptors.response.use(
       return Promise.reject(new Error(message));
     }
 
-    if (isAuthLoginOrRegisterRequest(originalRequest)) {
+    if (isAuthEndpoint(originalRequest)) {
       const message =
         getApiErrorMessage(error.response?.data) ??
         error.message ??
-        "Login failed";
+        "Unauthorized";
       return Promise.reject(new Error(message));
     }
 
-    if (isRefreshRequest(originalRequest)) {
-      await clearTokens();
-      redirectToLogin();
-      return Promise.reject(new Error("Session expired"));
-    }
-
-    if (await refreshSession()) {
+    if (!originalRequest._retry && (await refreshSession())) {
+      originalRequest._retry = true;
       return apiAxios.request(originalRequest);
     }
 
-    await clearTokens();
+    // Refresh failed: the backend already cleared the cookies.
     redirectToLogin();
     return Promise.reject(new Error("Session expired"));
   }

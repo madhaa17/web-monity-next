@@ -2,15 +2,6 @@ import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV !== "production";
 
-// The browser calls the backend directly (lib/api/client.ts), so its origin must be allowed in connect-src.
-function apiOrigin(): string {
-  try {
-    return new URL(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080").origin;
-  } catch {
-    return "";
-  }
-}
-
 const csp = [
   "default-src 'self'",
   // Next.js injects inline bootstrap scripts into prerendered pages; nonces would force dynamic rendering.
@@ -20,7 +11,8 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
-  `connect-src 'self' ${apiOrigin()}${isDev ? " ws: wss:" : ""}`,
+  // The browser only talks to this origin; proxy.ts forwards /api/v1 to the backend.
+  `connect-src 'self'${isDev ? " ws: wss:" : ""}`,
   "worker-src 'self'",
   "manifest-src 'self'",
   "object-src 'none'",

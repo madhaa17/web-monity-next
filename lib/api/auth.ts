@@ -1,63 +1,41 @@
-import { apiClient } from "@/lib/api/client";
+import { apiClient, logoutSession } from "@/lib/api/client";
 import type {
   ApiResponse,
   AuthResponse,
   User,
   LoginBody,
   RegisterBody,
-  RefreshBody,
   ChangePasswordBody,
 } from "@/lib/api/types";
 
-/** Backend may return token/refreshToken (camelCase) or Token/RefreshToken (PascalCase). */
-function normalizeAuthData(data: unknown): AuthResponse {
-  if (data == null || typeof data !== "object") {
-    return { token: "", refreshToken: "" };
-  }
-  const o = data as Record<string, unknown>;
-  const token =
-    (typeof o.token === "string" ? o.token : null) ??
-    (typeof o.Token === "string" ? o.Token : null) ??
-    "";
-  const refreshToken =
-    (typeof o.refreshToken === "string" ? o.refreshToken : null) ??
-    (typeof o.RefreshToken === "string" ? o.RefreshToken : null) ??
-    "";
-  const user = o.user != null ? (o.user as User) : undefined;
-  return { token, refreshToken, user };
-}
+/*
+ * Login, register, refresh and password change answer with the user only; the backend puts the
+ * tokens in HttpOnly cookies on the same response.
+ */
 
-export async function login(body: LoginBody): Promise<AuthResponse> {
+export async function login(body: LoginBody): Promise<User | undefined> {
   const res = await apiClient<ApiResponse<AuthResponse>>("/auth/login", {
     method: "POST",
     body: body as unknown as Record<string, unknown>,
   });
-  return normalizeAuthData(res.data);
+  return res.data?.user;
 }
 
-export async function register(body: RegisterBody): Promise<AuthResponse> {
+export async function register(body: RegisterBody): Promise<User | undefined> {
   const res = await apiClient<ApiResponse<AuthResponse>>("/auth/register", {
     method: "POST",
     body: body as unknown as Record<string, unknown>,
   });
-  return normalizeAuthData(res.data);
+  return res.data?.user;
 }
 
-export async function refresh(refreshToken: string): Promise<AuthResponse> {
-  const res = await apiClient<ApiResponse<AuthResponse>>("/auth/refresh", {
-    method: "POST",
-    body: { refresh_token: refreshToken } as unknown as Record<string, unknown>,
-  });
-  return normalizeAuthData(res.data);
-}
-
-/** Changes the password; the backend signs out other sessions and returns a new token pair. */
-export async function changePassword(body: ChangePasswordBody): Promise<AuthResponse> {
+/** Changes the password; the backend signs out other sessions and rotates this session's cookies. */
+export async function changePassword(body: ChangePasswordBody): Promise<User | undefined> {
   const res = await apiClient<ApiResponse<AuthResponse>>("/auth/password", {
     method: "PUT",
     body: body as unknown as Record<string, unknown>,
   });
-  return normalizeAuthData(res.data);
+  return res.data?.user;
 }
 
 export async function me(): Promise<User> {
@@ -65,9 +43,7 @@ export async function me(): Promise<User> {
   return res.data;
 }
 
-export async function logout(refreshToken?: string): Promise<void> {
-  await apiClient<unknown>("/auth/logout", {
-    method: "POST",
-    body: { refresh_token: refreshToken ?? "" } as unknown as Record<string, unknown>,
-  });
+/** Revokes the session and clears the auth cookies. */
+export async function logout(): Promise<void> {
+  await logoutSession();
 }

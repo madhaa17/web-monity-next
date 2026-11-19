@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { MoneyTor_TOKEN } from "@/lib/auth/cookies";
-import { getBaseUrl } from "@/lib/api/client";
+import { getApiUrl, internalHeaders } from "@/lib/api/server-config";
 
 /**
  * Read access token from cookies. Use only in Server Components, Route Handlers, or server-side code.
@@ -20,12 +20,13 @@ export async function serverFetch<T>(
   init?: RequestInit
 ): Promise<T> {
   const token = await getServerToken();
-  const baseUrl = getBaseUrl().replace(/\/$/, "");
+  const baseUrl = getApiUrl();
   const url = path.startsWith("/") ? `${baseUrl}/api/v1${path}` : `${baseUrl}/api/v1/${path}`;
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(init?.headers as Record<string, string> | undefined),
+    ...internalHeaders(),
   };
   if (token) {
     headers.Authorization = `Bearer ${token}`;

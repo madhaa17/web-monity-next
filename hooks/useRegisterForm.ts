@@ -22,22 +22,9 @@ export function useRegisterForm() {
   async function onSubmit(data: RegisterFormValues) {
     setApiError(null);
     try {
-      const res = await registerApi(data);
-      if (res.token && res.refreshToken) {
-        const sessionRes = await fetch("/api/auth/session", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ token: res.token, refreshToken: res.refreshToken }),
-        });
-        if (sessionRes.ok) {
-          router.push("/dashboard");
-        } else {
-          setApiError("Failed to set session");
-        }
-      } else {
-        setApiError("Invalid response from server");
-      }
+      // The backend sets the session cookies on this response.
+      await registerApi(data);
+      router.push("/dashboard");
     } catch (err) {
       setApiError(err instanceof Error ? err.message : "Registration failed");
     }
